@@ -1,16 +1,15 @@
-
-#define LLTopTree_cxx
+#define LLTopAna_cxx
 #include "LLTopAna.h"
-
+#include <TH2.h>
+#include <TStyle.h>
+#include <TCanvas.h>
 #include "TH1F.h"
 #include "TH2F.h"
-#include "TStyle.h"
-#include "TCanvas.h"
 #include "HistogramManager.h"
 #include "TLorentzVector.h"
 #include "TRandom.h"
+#include "TMath.h"
 #include <iostream>
-//distance in cm (sometimes you will see *100 to go in meters, E en GeV
 
 void SetSebStyle()
 {
@@ -30,16 +29,13 @@ void SaveInFile(TH1* ahisto, TFile* afile)
  ahisto->Write();
  current->cd();
 }
-//(0) aNN arbitrary, (180) aTagcut HT cut, (20) aPtmin jet cut, (2999) aPtm Max energy jets, 0. et 2.4 eta min et max, 0 (aFreeCut) et 1 (aIntCut) arbitrary
-void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax, 
+
+void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax, 
                 float aEtaMin, float aEtaMax, float aFreeCut, int aIntCut, 
 		TString afilename)
 {
-///////////////////////////////////////////////////////////////////
-//                  T I T L E      C A R D S                     //
 
-//$$
-  int    NN           = aNN;      // 0/1 JP, 2/3 TC, 4/5 SSV, 6 CSV, 7 SL
+      int    NN           = aNN;      // 0/1 JP, 2/3 TC, 4/5 SSV, 6 CSV, 7 SL
   float  TagCut       = aTagCut;  // tag cut
   float  PtMin        = aPtMin;   // pt jet min
   float  PtMax        = aPtMax;   // pt jet max
@@ -47,12 +43,35 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
   float  EtaMax       = aEtaMax;  // eta jet max
   float  FreeCut      = aFreeCut; 
   int    IntCut       = aIntCut; 
-  TString  filename   = afilename;
-//$$
+  TString  filename   = afilename;//   In a ROOT session, you can do:
+//      root> .L LLTopAna.C
+//      root> LLTopAna t
+//      root> t.GetEntry(12); // Fill t data members with entry number 12
+//      root> t.Show();       // Show values of entry 12
+//      root> t.Show(16);     // Read and show values of entry 16
+//      root> t.Loop();       // Loop on all entries
+//
+
+//     This is the loop skeleton where:
+//    jentry is the global entry number in the chain
+//    ientry is the entry number in the current Tree
+//  Note that the argument to GetEntry must be:
+//    jentry for TChain::GetEntry
+//    ientry for TTree::GetEntry and TBranch::GetEntry
+//
+//       To read only selected branches, Insert statements like:
+// METHOD1:
+//    fChain->SetBranchStatus("*",0);  // disable all branches
+//    fChain->SetBranchStatus("branchname",1);  // activate branchname
+// METHOD2: replace line
+//    fChain->GetEntry(jentry);       //read all branches
+//by  b_branchname->GetEntry(ientry); //read only this branch
+
+
 
 //$$
   float HTcut =  aTagCut; 
-  float Vrcut =  FreeCut;//useless
+//   float dRcut =  FreeCut; 
 //$$
 
 ///////////////////////////////////////////////////////////////////
@@ -81,9 +100,6 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hData_Mu_pt	 = new TH1F("hData_Mu_pt","",100,0.,400.);
  TH1F* hData_Mu_eta	 = new TH1F("hData_Mu_eta","",50,-2.5,2.5);
  TH1F* hData_Mu_phi	 = new TH1F("hData_Mu_phi","",66,-3.3,3.3);
- TH1F* hData_Mu_PFiso      = new TH1F("hData_Mu_PFiso","",5,-0.5,4.5);
- TH1F* hData_Mu_MVAiso     = new TH1F("hData_Mu_MVAiso","",5,-0.5,4.5);
- TH1F* hData_Mu_CutBasedId = new TH1F("hData_Mu_CutBasedId","",5,-0.5,4.5);
  TH1F* hData_nMuRec      = new TH1F("hData_nMuRec","",11,-0.5,10.5);
  TH1F* hData_MuMu_mass   = new TH1F("hData_MuMu_mass","",100,0.,400.);
  TH1F* hData_Mu_pt1	 = new TH1F("hData_Mu_pt1","",100,0.,400.);
@@ -93,8 +109,8 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hData_PVx        = new TH1F("hData_PVx","",100,-0.4,0.4);
  TH1F* hData_PVy        = new TH1F("hData_PVy","",100,-0.4,0.4);
  TH1F* hData_PVz        = new TH1F("hData_PVz","",100,-20.,20.);
- TH1F* hGen_PVx	        = new TH1F("hGen_PVx","",100,-0.4,0.4);
- TH1F* hGen_PVy	        = new TH1F("hGen_PVy","",100,-0.4,0.4);
+ TH1F* hGen_PVx	        = new TH1F("hGen_PVx","",200,-0.4,0.4);
+ TH1F* hGen_PVy	        = new TH1F("hGen_PVy","",200,-0.4,0.4);
  TH1F* hGen_PVz	        = new TH1F("hGen_PVz","",100,-20.,20.);
  TH1F* hDataGen_PV_dx	= new TH1F("hDataGen_PV_dx","",100,-0.05,0.05);
  TH1F* hDataGen_PV_dy	= new TH1F("hDataGen_PV_dy","",100,-0.05,0.05);
@@ -117,22 +133,22 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hGen_neu         = new TH1F("hGen_neu","",5,-0.5,4.5);
  TH1F* hGen_neu_pt      = new TH1F("hGen_neu_pt","",50,0.,1000.);
  TH1F* hGen_neu_eta     = new TH1F("hGen_neu_eta","",50,-5.,5.);
- TH1F* hGen_neuneu_DR   = new TH1F("hGen_neuneu_DR","dR between GenNeutralinos",100,0.,5.);
+ TH1F* hGen_neuneu_DR   = new TH1F("hGen_neuneu_dR","",33,0.,3.3);
  TH1F* hGen_neuneu_dphi = new TH1F("hGen_neuneu_dphi","",33,0.,3.3);
- TH1F* hGen_neusmu_DR   = new TH1F("hGen_neusmu_DR","",50,0.,5.);
+ TH1F* hGen_neusmu_DR   = new TH1F("hGen_neusmu_dR","",33,0.,3.3);
  TH1F* hGen_neusmu_dphi = new TH1F("hGen_neusmu_dphi","",33,0.,3.3);
  TH1F* hGen_neumu_DR    = new TH1F("hGen_neumu_DR","",100,0.,5.);
  TH1F* hGen_neumu_dphi  = new TH1F("hGen_neumu_dphi","",33,0.,3.3);
  TH1F* hGen_neu_testE   = new TH1F("hGen_neu_testE","",100,-0.5,0.5);
- TH1F* hGen_neuqtop_DR  = new TH1F("hGen_neuqtop_DR","",50,0.,5.);
+ TH1F* hGen_neuqtop_DR  = new TH1F("hGen_neuqtop_dR","",33,0.,3.3);
  TH1F* hGen_neuqtop_dphi= new TH1F("hGen_neuqtop_dphi","",33,0.,3.3);
- TH1F* hGen_neuqtop_deta= new TH1F("hGen_neuqtop_deta","",50,0.,5.);
- TH1F* hGen_neulepW_DR  = new TH1F("hGen_neulepW_DR","",50,0.,5.);
+ TH1F* hGen_neuqtop_deta= new TH1F("hGen_neuqtop_deta","",33,0.,3.3);
+ TH1F* hGen_neulepW_DR  = new TH1F("hGen_neulepW_dR","",33,0.,3.3);
  TH1F* hGen_neulepW_dphi= new TH1F("hGen_neulepW_dphi","",33,0.,3.3);
- TH1F* hGen_neulepW_deta= new TH1F("hGen_neulepW_deta","",50,0.,5.);
- TH1F* hGen_neusq_DR    = new TH1F("hGen_neusq_DR","",50,0.,5.);
+ TH1F* hGen_neulepW_deta= new TH1F("hGen_neulepW_deta","",33,0.,3.3);
+ TH1F* hGen_neusq_DR    = new TH1F("hGen_neusq_dR","",33,0.,3.3);
  TH1F* hGen_neusq_dphi  = new TH1F("hGen_neusq_dphi","",33,0.,3.3);
- TH1F* hGen_neusq_deta  = new TH1F("hGen_neusq_deta","",50,0.,5.);
+ TH1F* hGen_neusq_deta  = new TH1F("hGen_neusq_deta","",33,0.,3.3);
 
  TH1F* hGen_top         = new TH1F("hGen_top","",5,-0.5,4.5);
  TH1F* hGen_top_r       = new TH1F("hGen_top_r","",100,0.,100.);
@@ -153,6 +169,11 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hGen_qtop_eta    = new TH1F("hGen_qtop_eta","",50,-2.5,2.5);
  TH1F* hGen_qtop_dV     = new TH1F("hGen_qtop_dV","",100,0.,0.01);
 
+ TH1F* hGen_genb	= new TH1F("hGen_genb","",10,-0.5,9.5);
+ TH1F* hGen_genc	= new TH1F("hGen_genc","",10,-0.5,9.5);
+ TH1F* hGen_genb_test	= new TH1F("hGen_genb_test","",9,-4.5,4.5);
+ TH1F* hGen_genc_test	= new TH1F("hGen_genc_test","",9,-4.5,4.5);
+
  TH1F* hGen_lepW	= new TH1F("hGen_lepW","",10,-0.5,9.5);
  TH1F* hGen_lepW_pt     = new TH1F("hGen_lepW_pt","",50,0.,500.);
  TH1F* hGen_lepW_eta    = new TH1F("hGen_lepW_eta","",50,-2.5,2.5);
@@ -162,28 +183,6 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hGen_stoq_pt	= new TH1F("hGen_stoq_pt","",50,0.,500.);
  TH1F* hGen_stoq_eta	= new TH1F("hGen_stoq_eta","",50,-2.5,2.5);
  TH1F* hGen_stoq_dV     = new TH1F("hGen_stoq_dV","",100,0.,0.01);
-
-//  TH1F* hGenTk_dv            = new TH1F("hGenTk_dv","",100,0.,0.01);
-//  TH1F* hGenTk_dv_big        = new TH1F("hGenTk_dv_big","",100,0.,1.);
-//  TH1F* hGenTk_phi0	    = new TH1F("hGenTk_phi0","",66,-3.3,3.3);
-//  TH1F* hGenTk_pt            = new TH1F("hGenTk_pt","",100,0.,400.);
-//  TH1F* hGenTk_LLP_dpt	    = new TH1F("hGenTk_LLP_dpt","",100,-0.5,0.5);
-//  TH1F* hGenTk_LLP_deta      = new TH1F("hGenTk_LLP_deta","",100,-0.1,0.1);
-//  TH1F* hGenTk_LLP_dphi      = new TH1F("hGenTk_LLP_dphi","",100,-0.5,0.5);
-//  TH1F* hGenTk_LLP_dphi0     = new TH1F("hGenTk_LLP_dphi0","",100,-0.1,0.1);
-//  TH1F* hGenTk_LLP_dpt_cut   = new TH1F("hGenTk_LLP_dpt_cut","",100,-0.5,0.5);
-//  TH1F* hGenTk_LLP_dpt_cut_ss   = new TH1F("hGenTk_LLP_dpt_cut_ss","",100,-0.5,0.5);
-//  TH1F* hGenTk_LLP_dpt_cut_os   = new TH1F("hGenTk_LLP_dpt_cut_os","",100,-0.5,0.5);
-//  TH1F* hGenTk_Sim_dpt	    = new TH1F("hGenTk_Sim_dpt","",100,-0.5,0.5);
-//  TH1F* hGenTk_Sim_deta      = new TH1F("hGenTk_Sim_deta","",100,-0.1,0.1);
-//  TH1F* hGenTk_Sim_dphi0     = new TH1F("hGenTk_Sim_dphi0","",100,-0.1,0.1);
-//  TH1F* hGenTk_Sim_dpt_cut   = new TH1F("hGenTk_Sim_dpt_cut","",100,-0.5,0.5);
-//  TH1F* hGenTk_Oth_dpt       = new TH1F("hGenTk_Oth_dpt","",100,-0.5,0.5);
-//  TH1F* hGenTk_Oth_deta      = new TH1F("hGenTk_Oth_deta","",100,-0.1,0.1);
-//  TH1F* hGenTk_Oth_dphi0     = new TH1F("hGenTk_Oth_dphi0","",100,-0.1,0.1);
-//  TH1F* hGenTk_Oth_dpt_cut   = new TH1F("hGenTk_Oth_dpt_cut","",100,-0.5,0.5);
-//  TH1F* hGenTk_Oth_dpt_cut_ss   = new TH1F("hGenTk_Oth_dpt_cut_ss","",100,-0.5,0.5);
-//  TH1F* hGenTk_Oth_dpt_cut_os   = new TH1F("hGenTk_Oth_dpt_cut_os","",100,-0.5,0.5);
 
  TH1F* hData_MET           = new TH1F("hData_MET","",100,0.,1000.);
  TH1F* hData_MET_phi	   = new TH1F("hData_MET_phi","",66,-3.3,3.3);
@@ -199,56 +198,143 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hData_Jet_ntrksel   = new TH1F("hData_Jet_ntrksel","",41,-0.5,40.5);
  TH1F* hData_Jet_njet_forLLP = new TH1F("hData_Jet_njet_forLLP","",20,-0.5,19.5);
 
- TH1F* hData_Jet1          = new TH1F("hData_Jet1","",21,-0.5,20.5);
- TH1F* hData_Jet1_METpt    = new TH1F("hData_Jet1_METpt","",100,0.,10.);
+ TH1F* hData_Jetseed_pt       = new TH1F("hData_Jetseed_pt","",100,0.,1000.);
+ TH1F* hData_Jetseed_eta      = new TH1F("hData_Jetseed_eta","",50,-2.5,2.5);
+ TH1F* hData_Jet_njet1     = new TH1F("hData_Jet_njet1","",21,-0.5,20.5);
+ TH1F* hData_Jet_njet2     = new TH1F("hData_Jet_njet2","",21,-0.5,20.5);
+ TH1F* hData_Jet1_METpt    = new TH1F("hData_Jet1_METpt","",100,0.,2.);
  TH1F* hData_Jet1_METdphi  = new TH1F("hData_Jet1_METdphi","",33,0.,3.3);
  TH1F* hData_Jet1_ntrksel  = new TH1F("hData_Jet1_ntrksel","",41,-0.5,40.5);
- TH1F* hData_Jet2          = new TH1F("hData_Jet2","",21,-0.5,20.5);
 
-//  TH1F* hData_eljet_dR      = new TH1F("hData_eljet_dR","",50,0.,5.);
-//  TH1F* hData_elaxis_dR     = new TH1F("hData_elaxis_dR","",50,0.,5.);
-//  TH1F* hData_mujet_dR      = new TH1F("hData_mujet_dR","",50,0.,5.);
-//  TH1F* hData_muaxis_dR     = new TH1F("hData_muaxis_dR","",50,0.,5.);
-//  TH1F* hData_METaxis_dphi  = new TH1F("hData_METaxis_dphi","",33,0.,3.3);
+ TH1F* hData_axis12_dR  = new TH1F("hData_axis12_dR","",33,0.,3.3);
+ TH1F* hData_axis12_dphi= new TH1F("hData_axis12_dphi","",33,0.,3.3);
+ TH1F* hData_axis12_deta= new TH1F("hData_axis12_deta","",33,0.,3.3);
 
- TH1F* hDataGen_LLPrec1_dR  = new TH1F("hDataGen_LLPrec1_dR","",50,0.,5.);
- TH1F* hDataGen_LLPrec1_dphi= new TH1F("hDataGen_LLPrec1_dphi","",33,0.,3.3);
- TH1F* hDataGen_LLPrec1_deta= new TH1F("hDataGen_LLPrec1_deta","",50,0.,5.);
- TH1F* hDataGen_LLPrec2_sym_dR  = new TH1F("hDataGen_LLPrec2_sym_dR","",50,0.,5.);
- TH1F* hDataGen_LLPrec2_sym_dphi= new TH1F("hDataGen_LLPrec2_sym_dphi","",33,0.,3.3);
- TH1F* hDataGen_LLPrec2_dR  = new TH1F("hDataGen_LLPrec2_dR","",50,0.,5.);
- TH1F* hDataGen_LLPrec2_dphi= new TH1F("hDataGen_LLPrec2_dphi","",33,0.,3.3);
- TH1F* hDataGen_LLPrec2_deta= new TH1F("hDataGen_LLPrec2_deta","",50,0.,5.);
- TH1F* hDataGen_LLPrec2_dRsym  = new TH1F("hDataGen_LLPrec2_dRsym","",50,0.,5.);
- TH1F* hDataGen_LLPrec2_dphisym= new TH1F("hDataGen_LLPrec2_dphisym","",33,0.,3.3);
- TH1F* hDataGen_Jet_dpt    = new TH1F("hDataGen_Jet_dpt" ,"",100,-1.,1.);
- TH1F* hDataGen_Jet_deta   = new TH1F("hDataGen_Jet_deta","",100,-1.,1.);
- TH1F* hDataGen_Jet_dphi   = new TH1F("hDataGen_Jet_dphi","",100,-1.,1.);
- TH1F* hDataGen_Jet_pt     = new TH1F("hDataGen_Jet_pt","",100,0.,1000.);
- TH1F* hDataGen_Jet_eta	   = new TH1F("hDataGen_Jet_eta","",50,-2.5,2.5);
- TH1F* hData_Jetaxis_dR    = new TH1F("hData_Jetaxis_dR","",50,0.,5.);
- TH1F* hData_Jet_Track_dR  = new TH1F("hData_Jet_Track_dR","",50,0.,5.);
- TH1F* hData_Tracks_repart = new TH1F("hData_Tracks_repart","",4,0.,3.);
- TH1F* hData_Muon_Axis_dR4   = new TH1F("hData_Muon_Axis_dR4","",4,0.,3.);
+ TH1F* hData_museed_pt      = new TH1F("hData_museed_pt","",100,0.,400.);
+ TH1F* hData_museed_eta     = new TH1F("hData_museed_eta","",50,-2.5,2.5);
+ TH1F* hData_museed_dphiMET = new TH1F("hData_museed_dphiMET","",33,0.,3.3);
+ TH1F* hData_museed_MET     = new TH1F("hData_museed_MET","",100,0.,400.);
+ TH1F* hDataGen_museed_dR   = new TH1F("hDataGen_museed_dR","",33,0.,3.3);
+
+ TH1F* hData_elseed_pt	    = new TH1F("hData_elseed_pt","",100,0.,400.);
+ TH1F* hData_elseed_eta	    = new TH1F("hData_elseed_eta","",50,-2.5,2.5);
+ TH1F* hData_elseed_dphiMET = new TH1F("hData_elseed_dphiMET","",33,0.,3.3);
+ TH1F* hData_elseed_MET	    = new TH1F("hData_elseed_MET","",100,0.,400.);
+ TH1F* hDataGen_elseed_dR   = new TH1F("hDataGen_elseed_dR","",33,0.,3.3);
+
+ TH1F* hDataGen_LLP_dR        = new TH1F("hDataGen_LLP_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP1_dR       = new TH1F("hDataGen_LLP1_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP1_dphi     = new TH1F("hDataGen_LLP1_dphi","",33,0.,3.3);
+ TH1F* hDataGen_LLP1_deta     = new TH1F("hDataGen_LLP1_deta","",33,0.,3.3);
+ TH1F* hDataGen_LLP2_sym_dR   = new TH1F("hDataGen_LLP2_sym_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP2_sym_dphi = new TH1F("hDataGen_LLP2_sym_dphi","",33,0.,3.3);
+ TH1F* hDataGen_LLP2_dR       = new TH1F("hDataGen_LLP2_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP2_dphi     = new TH1F("hDataGen_LLP2_dphi","",33,0.,3.3);
+ TH1F* hDataGen_LLP2_deta     = new TH1F("hDataGen_LLP2_deta","",33,0.,3.3);
+ TH1F* hDataGen_Jet_dpt       = new TH1F("hDataGen_Jet_dpt" ,"",100,-1.,1.);
+ TH1F* hDataGen_Jet_deta      = new TH1F("hDataGen_Jet_deta","",100,-1.,1.);
+ TH1F* hDataGen_Jet_dphi      = new TH1F("hDataGen_Jet_dphi","",100,-1.,1.);
+ TH1F* hDataGen_Jet_pt        = new TH1F("hDataGen_Jet_pt","",100,0.,1000.);
+ TH1F* hDataGen_Jet_eta	      = new TH1F("hDataGen_Jet_eta","",50,-2.5,2.5);
+
+ TH1F* hDataGen_seed_dR            = new TH1F("hDataGen_seed_dR","",33,0.,3.3);
+ TH1F* hDataGen_seed_deta          = new TH1F("hDataGen_seed_deta","",33,0.,3.3);
+ TH1F* hDataGen_seed_dphi          = new TH1F("hDataGen_seed_dphi","",33,0.,3.3);
+ TH1F* hDataGen_seed_dR1GT15_dR    = new TH1F("hDataGen_seed_dR1GT15_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP1_dRseedGT15_dR = new TH1F("hDataGen_LLP1_dRseedGT15_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP1_dR2GT15_dR    = new TH1F("hDataGen_LLP1_dR2GT15_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP2_dR1GT15_dR    = new TH1F("hDataGen_LLP2_dR1GT15_dR","",33,0.,3.3);
+
+ TH1F* hDataGen_seed_dRLT15_ntrk     = new TH1F("hDataGen_seed_dRLT15_ntrk","",51,-0.5,50.5);
+ TH1F* hDataGen_seed_dRLT15_ntrksel  = new TH1F("hDataGen_seed_dRLT15_ntrksel","",51,-0.5,50.5);
+ TH1F* hDataGen_seed_dRLT15_ntrkbdt  = new TH1F("hDataGen_seed_dRLT15_ntrkbdt","",51,-0.5,50.5);
+ TH1F* hDataGen_seed_dRLT15_trkQ     = new TH1F("hDataGen_seed_dRLT15_trkQ","",51,-25.5,25.5);
+ TH1F* hDataGen_seed_dRLT15_trkPt    = new TH1F("hDataGen_seed_dRLT15_trkPt","",100,0.,1000.);
+ TH1F* hDataGen_seed_dRLT15_trkPtRel = new TH1F("hDataGen_seed_dRLT15_trkPtRel","",100,0.,5.);
+
+ TH1F* hDataGen_seed_dRGT15_ntrk     = new TH1F("hDataGen_seed_dRGT15_ntrk","",51,-0.5,50.5);
+ TH1F* hDataGen_seed_dRGT15_ntrksel  = new TH1F("hDataGen_seed_dRGT15_ntrksel","",51,-0.5,50.5);
+ TH1F* hDataGen_seed_dRGT15_ntrkbdt  = new TH1F("hDataGen_seed_dRGT15_ntrkbdt","",51,-0.5,50.5);
+ TH1F* hDataGen_seed_dRGT15_trkQ     = new TH1F("hDataGen_seed_dRGT15_trkQ","",51,-25.5,25.5);
+ TH1F* hDataGen_seed_dRGT15_trkPt    = new TH1F("hDataGen_seed_dRGT15_trkPt","",100,0.,1000.);
+ TH1F* hDataGen_seed_dRGT15_trkPtRel = new TH1F("hDataGen_seed_dRGT15_trkPtRel","",100,0.,5.);
 
  TH1F* hData_nTk        = new TH1F("hData_nTk","",501,-0.5,500.5);
 
- TH1F* hTkGenLLP_test	 = new TH1F("hTkGenLLP_test","",5,-2.5,2.5);
- TH1F* hTkGenLLPnot_test = new TH1F("hTkGenLLPnot_test","",5,-2.5,2.5);
- TH1F* hTkGenLLP_dV	 = new TH1F("hTkGenLLP_dV","",100,0.,1.);
- TH1F* hTkGenLLPnot_dV	 = new TH1F("hTkGenLLPnot_dV","",100,0.,1.);
+ TH1F* hSimGen_dq        = new TH1F("hSimGen_dq","",5,-2.5,2.5);
+ TH1F* hSimGen_dpt       = new TH1F("hSimGen_dpt","",100,-0.1,0.1);
+ TH1F* hSimGen_deta      = new TH1F("hSimGen_deta","",100,-0.1,0.1);
+ TH1F* hSimGen_dphi      = new TH1F("hSimGen_dphi","",100,-0.1,0.1);
+ TH1F* hSimGen_dpt_cut   = new TH1F("hSimGen_dpt_cut","",100,-0.1,0.1);
+ TH1F* hSimGen_deta_cut  = new TH1F("hSimGen_deta_cut","",100,-0.1,0.1);
+ TH1F* hSimGen_dphi_cut  = new TH1F("hSimGen_dphi_cut","",100,-0.1,0.1);
 
- TH1F* hTkSim_dV	 = new TH1F("hTkSim_dV","",100,0.,0.01);
- TH1F* hTkSim_dV_big     = new TH1F("hTkSim_dV_big","",100,0.,1.);
- TH1F* hTkSim_dphiTop    = new TH1F("hTkSim_dphiTop","",33,0.,3.3);
+ TH1F* hTkGen_dq	 = new TH1F("hTkGen_dq","",5,-2.5,2.5);
+ TH1F* hTkGen_dpt        = new TH1F("hTkGen_dpt","",200,-1.0,1.0);
+ TH1F* hTkGen_deta       = new TH1F("hTkGen_deta","",100,-0.5,0.5);
+ TH1F* hTkGen_dphi       = new TH1F("hTkGen_dphi","",100,-0.1,0.1);
+ TH1F* hTkGen_dphiraw    = new TH1F("hTkGen_dphiraw","",100,-0.1,0.1);
+
+ TH1F* hTkGen_dpt_ptLT4      	  = new TH1F("hTkGen_dpt_ptLT4","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_ptGT4      	  = new TH1F("hTkGen_dpt_ptGT4","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_etaLT08    	= new TH1F("hTkGen_dpt_etaLT08","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_etaGT08    	= new TH1F("hTkGen_dpt_etaGT08","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_drsigLT170 = new TH1F("hTkGen_dpt_drsigLT170","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_drsigGT170 = new TH1F("hTkGen_dpt_drsigGT170","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_inJet      	  = new TH1F("hTkGen_dpt_inJet","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_NOTinJet     = new TH1F("hTkGen_dpt_NOTinJet","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_hitLE15    	= new TH1F("hTkGen_dpt_hitLE15","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_hitGT15    	= new TH1F("hTkGen_dpt_hitGT15","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_ctauLT9    	= new TH1F("hTkGen_dpt_ctauLT9","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_ctauGT9    	= new TH1F("hTkGen_dpt_ctauGT9","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_hitLE10    	= new TH1F("hTkGen_dpt_hitLE10","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_11hit13    	= new TH1F("hTkGen_dpt_11hit13","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_14hit17    	= new TH1F("hTkGen_dpt_14hit17","",200,-1.0,1.0);
+ TH1F* hTkGen_dpt_hitGE18    	= new TH1F("hTkGen_dpt_hitGE18","",200,-1.0,1.0);
+ 
+ TH1F* hTkGen_deta_ptLT4           = new TH1F("hTkGen_deta_ptLT4","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_ptGT4           = new TH1F("hTkGen_deta_ptGT4","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_etaLT08       = new TH1F("hTkGen_deta_etaLT08","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_etaGT08       = new TH1F("hTkGen_deta_etaGT08","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_drsigLT170 = new TH1F("hTkGen_deta_drsigLT170","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_drsigGT170 = new TH1F("hTkGen_deta_drsigGT170","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_inJet           = new TH1F("hTkGen_deta_inJet","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_NOTinJet     = new TH1F("hTkGen_deta_NOTinJet","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_hitLE15       = new TH1F("hTkGen_deta_hitLE15","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_hitGT15       = new TH1F("hTkGen_deta_hitGT15","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_ctauLT9       = new TH1F("hTkGen_deta_ctauLT9","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_ctauGT9       = new TH1F("hTkGen_deta_ctauGT9","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_hitLE10       = new TH1F("hTkGen_deta_hitLE10","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_11hit13       = new TH1F("hTkGen_deta_11hit13","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_14hit17       = new TH1F("hTkGen_deta_14hit17","",100,-0.5,0.5);
+ TH1F* hTkGen_deta_hitGE18       = new TH1F("hTkGen_deta_hitGE18","",100,-0.5,0.5);
+
+ TH1F* hTkGen_dphi_ptLT4           = new TH1F("hTkGen_dphi_ptLT4","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_ptGT4           = new TH1F("hTkGen_dphi_ptGT4","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_etaLT08       = new TH1F("hTkGen_dphi_etaLT08","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_etaGT08       = new TH1F("hTkGen_dphi_etaGT08","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_drsigLT170 = new TH1F("hTkGen_dphi_drsigLT170","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_drsigGT170 = new TH1F("hTkGen_dphi_drsigGT170","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_inJet           = new TH1F("hTkGen_dphi_inJet","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_NOTinJet     = new TH1F("hTkGen_dphi_NOTinJet","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_hitLE15       = new TH1F("hTkGen_dphi_hitLE15","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_hitGT15       = new TH1F("hTkGen_dphi_hitGT15","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_ctauLT9       = new TH1F("hTkGen_dphi_ctauLT9","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_ctauGT9       = new TH1F("hTkGen_dphi_ctauGT9","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_hitLE10       = new TH1F("hTkGen_dphi_hitLE10","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_11hit13       = new TH1F("hTkGen_dphi_11hit13","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_14hit17       = new TH1F("hTkGen_dphi_14hit17","",100,-0.1,0.1);
+ TH1F* hTkGen_dphi_hitGE18       = new TH1F("hTkGen_dphi_hitGE18","",100,-0.1,0.1);
+       
  TH1F* hTkSim_dq         = new TH1F("hTkSim_dq","",5,-2.5,2.5);
- TH1F* hTkSim_dpt        = new TH1F("hTkSim_dpt","",100,-0.5,0.5);
- TH1F* hTkSim_deta       = new TH1F("hTkSim_deta","",100,-0.1,0.1);
- TH1F* hTkSim_dphi       = new TH1F("hTkSim_dphi","",100,-0.5,0.5);
- TH1F* hTkSim_dphi0      = new TH1F("hTkSim_dphi0","",100,-0.1,0.1);
- TH1F* hTkSim_dpt_cut    = new TH1F("hTkSim_dpt_cut","",100,-0.5,0.5);
+ TH1F* hTkSim_dpt        = new TH1F("hTkSim_dpt","",100,-0.2,0.2);
+ TH1F* hTkSim_deta       = new TH1F("hTkSim_deta","",100,-0.2,0.2);
+ TH1F* hTkSim_dphiraw    = new TH1F("hTkSim_dphiraw","",100,-0.2,0.2);
+ TH1F* hTkSim_dphi       = new TH1F("hTkSim_dphi","",100,-0.2,0.2);
+ TH1F* hTkSim_dpt_cut    = new TH1F("hTkSim_dpt_cut","",100,-0.2,0.2);
+ TH1F* hTkSim_deta_cut   = new TH1F("hTkSim_deta_cut","",100,-0.2,0.2);
+ TH1F* hTkSim_dphi_cut   = new TH1F("hTkSim_dphi_cut","",100,-0.2,0.2);
 
- //Usefull for BDT
  TH1F* hTkAll            = new TH1F("hTkAll","",201,-0.5,200.5);
  TH1F* hTkSim            = new TH1F("hTkSim","",101,-0.5,100.5);
  TH1F* hTkSim_pt         = new TH1F("hTkSim_pt","",100,0.,100.);
@@ -275,6 +361,7 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hTkSim_z1_PXF     = new TH1F("hTkSim_z1_PXF","",210,0.,210.);
  TH1F* hTkSim_z1_TID     = new TH1F("hTkSim_z1_TID","",210,0.,210.);
  TH1F* hTkSim_z1_TEC     = new TH1F("hTkSim_z1_TEC","",210,0.,210.);
+ TH1F* hTkSim_ctauLLP    = new TH1F("hTkSim_ctauLLP","",200,0.,200.);
  TH1F* hTkSim_tkneu_DR   = new TH1F("hTkSim_tkneu_DR","",100,0.,5.);
  TH1F* hTkSim_tkneu_dphi = new TH1F("hTkSim_tkneu_dphi","",33,0.,3.3);
  TH1F* hTkSim_tkjet_DR   = new TH1F("hTkSim_tkjet_DR","",100,0.,5.);
@@ -284,7 +371,6 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hTkSim_tkjet_op_DR   = new TH1F("hTkSim_tkjet_op_DR","",100,0.,5.);
  TH1F* hTkSim_tkjet_op_dphi = new TH1F("hTkSim_tkjet_op_dphi","",33,0.,3.3);
 
-//
  TH1F* hTkOth            = new TH1F("hTkOth","",101,-0.5,100.5);
  TH1F* hTkOth_pt	 = new TH1F("hTkOth_pt","",100,0.,100.);
  TH1F* hTkOth_eta        = new TH1F("hTkOth_eta","",50,-2.5,2.5);
@@ -307,316 +393,234 @@ void LLTopTree::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hTkOth_tkjet_DR   = new TH1F("hTkOth_tkjet_DR","",100,0.,5.);
  TH1F* hTkOth_tkjet_dphi = new TH1F("hTkOth_tkjet_dphi","",33,0.,3.3);
 
- //ADDED by Paul
+ TH1F* hTkMatch_LLP_hit     = new TH1F("hTkMatch_LLP_hit","",30,-0.5,29.5);
+ TH1F* hTkNoMatch_LLP_hit   = new TH1F("hTkNoMatch_LLP_hit","",30,-0.5,29.5);
+ TH1F* hTkMatch_NoLLP_hit   = new TH1F("hTkMatch_NoLLP_hit","",30,-0.5,29.5);
+ TH1F* hTkNoMatch_NoLLP_hit = new TH1F("hTkNoMatch_NoLLP_hit","",30,-0.5,29.5);
 
+ TH1F* hTkMatch_LLP_dpt_hitLE10   = new TH1F("hTkMatch_LLP_dpt_hitLE10","",200,-1.0,1.0);
+ TH1F* hTkMatch_LLP_dpt_11hit13   = new TH1F("hTkMatch_LLP_dpt_11hit13","",200,-1.0,1.0);
+ TH1F* hTkMatch_LLP_dpt_14hit17   = new TH1F("hTkMatch_LLP_dpt_14hit17","",200,-1.0,1.0);
+ TH1F* hTkMatch_LLP_dpt_hitGE18   = new TH1F("hTkMatch_LLP_dpt_hitGE18","",200,-1.0,1.0);
+ TH1F* hTkMatch_NoLLP_dpt_hitLE10 = new TH1F("hTkMatch_NoLLP_dpt_hitLE10","",200,-1.0,1.0);
+ TH1F* hTkMatch_NoLLP_dpt_11hit13 = new TH1F("hTkMatch_NoLLP_dpt_11hit13","",200,-1.0,1.0);
+ TH1F* hTkMatch_NoLLP_dpt_14hit17 = new TH1F("hTkMatch_NoLLP_dpt_14hit17","",200,-1.0,1.0);
+ TH1F* hTkMatch_NoLLP_dpt_hitGE18 = new TH1F("hTkMatch_NoLLP_dpt_hitGE18","",200,-1.0,1.0);
 
-TH1F* hData_FakeRate_vs_pt= new TH1F("hData_FakeRate_vs_pt","1-FakeRate_vs_pt",101,0.,100.);
-TH1F* hData_isMatched_dR_0= new TH1F("hData_isMatched_dR_0","dR BkgTracks_Axis",101,0.,5.);
-TH1F* hData_isMatched_dR_1= new TH1F("hData_isMatched_dR_1","dR SignalTracks_Axis1",100,0.,5.);
-TH1F* hData_isMatched_dR_2= new TH1F("hData_isMatched_dR_2","dR SignalTracks_Axis2",100,0.,5.);
-TH1F* hData_isMVA_Matched_dR_0= new TH1F("hData_isMVA_Matched_dR_0","dR_MVA_BkgTracks_Axis",100,0.,5.);
-TH1F* hData_isMVA_Matched_dR_1= new TH1F("hData_isMVA_Matched_dR_1","dR_IsMVA_SignalTracks_Axis1",100,0.,5.);
-TH1F* hData_isMVA_Matched_dR_2= new TH1F("hData_isMVA_Matched_dR_2","dR_IsMVA_SignalTracks_Axis2",100,0.,5.);
-TH1F* hData_dR_isMissMatched= new TH1F("hData_dR_isMissMatched","dR_Signal_isMissMatched",100,0.,5.);
-TH1F* hData_isMVA_dR_MissMatched= new TH1F("hData_isMVA_dR_MissMatched","dR_IsMVA_Signal_isMissMatched",100,0.,5.);
-hData_isMatched_dR_0->SetXTitle("dR");
-hData_isMatched_dR_1->SetXTitle("dR");
-hData_isMatched_dR_2->SetXTitle("dR");
-hData_dR_isMissMatched->SetXTitle("dR");
-hData_isMVA_Matched_dR_0->SetXTitle("dR");
-hData_isMVA_Matched_dR_1->SetXTitle("dR");
-hData_isMVA_Matched_dR_2->SetXTitle("dR");
-hData_isMVA_dR_MissMatched->SetXTitle("dR");  
+ TH1F* hDataGen_LLP_nTrks         = new TH1F("hDataGen_LLP_nTrks","",101,-0.5,100.5);
+ TH1F* hDataGen_LLP_track_mvatest = new TH1F("hDataGen_LLP_track_mvatest","",200,-1.,1.);
+ TH1F* hDataGen_LLP_track0_mva    = new TH1F("hDataGen_LLP_track0_mva","",200,-1.,1.);
+ TH1F* hDataGen_LLP_track0_dR     = new TH1F("hDataGen_LLP_track0_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP_track_dR      = new TH1F("hDataGen_LLP_track_dR","",33,0.,3.3);
+ TH1F* hDataGen_LLP_track_deta    = new TH1F("hDataGen_LLP_track_deta","",33,0.,3.3);
+ TH1F* hDataGen_LLP_track_dphi    = new TH1F("hDataGen_LLP_track_dphi","",33,0.,3.3);
 
+ TH1F* hData_Hemi_Vtx_NChi2_all = new TH1F("hData_Hemi_Vtx_NChi2_all","",70,-20.,50.);
+ TH1F* hData_Hemi_Vtx_NChi2     = new TH1F("hData_Hemi_Vtx_NChi2","",50,-10.,40.);
+ TH1F* hData_Hemi_Vtx_nTrks     = new TH1F("hData_Hemi_Vtx_nTrks","",40,0.5,40.5);
+ TH1F* hData_Hemi_Vtx_nTrks_step1 = new TH1F("hData_Hemi_Vtx_nTrks_step1","",40,0.5,40.5);
+ TH1F* hData_Hemi_Vtx_nTrks_step2 = new TH1F("hData_Hemi_Vtx_nTrks_step2","",40,0.5,40.5);
+ TH1F* hData_Hemi_Vtx_nTrks_step3 = new TH1F("hData_Hemi_Vtx_nTrks_step3","",40,0.5,40.5);
+ TH1F* hData_Hemi_Vtx_dist      = new TH1F("hData_Hemi_Vtx_dist","",50,0.,100.);
 
+ TH1F* hSim_Hemi_LLP_dist       = new TH1F("hSim_Hemi_LLP_dist","",50,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_chiOK = new TH1F("hSim_Hemi_LLP_dist_chiOK","",50,0.,100.);
+ TH1F* hSim_Hemi_Vtx_dx         = new TH1F("hSim_Hemi_Vtx_dx","",200,-1.,1.);
+ TH1F* hSim_Hemi_Vtx_dy         = new TH1F("hSim_Hemi_Vtx_dy","",200,-1.,1.);
+ TH1F* hSim_Hemi_Vtx_dz         = new TH1F("hSim_Hemi_Vtx_dz","",200,-1.,1.);
+ TH1F* hSim_Hemi_Vtx_dd         = new TH1F("hSim_Hemi_Vtx_dd","",100,0.,1.);
+ TH1F* hSim_Hemi_LLP_dist_ping  = new TH1F("hSim_Hemi_LLP_dist_ping","",50,0.,100.);
 
-TH1F *h1 = new TH1F("h1","Blue: isSimMatched / Red:All tracks// Cuts applied",101,0.,100.);
-// TH2F *hData_FakeRate = new TH2F("hData_FakeRate","hData_FakeRate",51,0.,50.,100,0.,1.);
-TH1F *hData_Mu_Axis_dR = new TH1F("hData_Mu_Axis_dR","hData_Mu_Axis_dR",100,0.,5.);
-TH1F *hData_Matched_bdtvalue = new TH1F("hData_Matched_bdtvalue","hData_Matched_bdtvalue",51,-1.,1.);
-TH1F *hData_NotMatched_bdtvalue = new TH1F("hData_NotMatched_bdtvalue","hData_NotMatched_bdtvalue",51,-1.,1.);
-TH1F *h_DataHSCP = new TH1F("h_DataHSCP","h_DataHSCP",101,0.,100.);
-TH1F *hData_NTracks_1 = new TH1F("hData_NTracks_1","hData_NTracks_1",101,0.,100.);
-TH1F *hData_NTracks_2 = new TH1F("hData_NTracks_2","hData_NTracks_2",101,0.,100.);
+ TH1F*  hData_Hemi_Vtx_dist_step1 = new TH1F("hData_Hemi_Vtx_dist_step1","",50,0.,100.);
+ TH1F*  hData_Hemi_Vtx_dist_step2 = new TH1F("hData_Hemi_Vtx_dist_step2","",50,0.,100.);
+ TH1F*  hData_Hemi_Vtx_dist_step3 = new TH1F("hData_Hemi_Vtx_dist_step3","",50,0.,100.);
 
+ TH1F* hSim_Hemi_LLP_dist_ping_step1 = new TH1F("hSim_Hemi_LLP_dist_ping_step1","",50,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_ping_step2 = new TH1F("hSim_Hemi_LLP_dist_ping_step2","",50,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_ping_step3 = new TH1F("hSim_Hemi_LLP_dist_ping_step3","",50,0.,100.);
 
-
-TH1F *hData_BothHemi_SB_dR = new TH1F("hData_BothHemi_SB_dR","dR_Hemis /S&B/2Hemis",100,0.,5.);
-TH1F *hData_SB_isMissMatched = new TH1F("hData_SB_isMissMatched","hData_SB_isMissMatched",100,0.,5.);
-TH1F *hData_BothHemi_S_dR = new TH1F("hData_BothHemi_S_dR","dR_Hemis /S/2Hemis",100,0.,5.);
-TH1F *hData_S_isMissMatched = new TH1F("hData_S_isMissMatched","dR_S_isMissMatched/2Hemis",100,0.,5.);
-hData_BothHemi_SB_dR->SetXTitle("dR");
-hData_SB_isMissMatched->SetXTitle("dR");
-hData_BothHemi_S_dR->SetXTitle("dR");
-hData_S_isMissMatched->SetXTitle("dR");
-
-
-    //reco with mva and filters
-TH1F *hData_Vtx_mva_x = new TH1F("hData_Vtx_mva_x","hData_Vtx_mva_x",201,-100.,100.);
-TH1F *hData_Vtx_mva_y = new TH1F("hData_Vtx_mva_y","hData_Vtx_mva_y",201,-100.,100.);
-TH1F *hData_Vtx_mva_z = new TH1F("hData_Vtx_mva_z","hData_Vtx_mva_z",201,-100.,100.);
-TH1F *hData_Vtx_mva_Ntrk = new TH1F("hData_Vtx_mva_Ntrk","hData_Vtx_mva_Ntrk",101,0.,100.);
-TH1F *hData_Vtx_mva_Chi2 = new TH1F("hData_Vtx_mva_Chi2","hData_Vtx_mva_Chi2",101,0.,100);
-
- //gen//
-TH1F *hData_Vtx_x = new TH1F("hData_Vtx_x","hData_Vtx_x",201,-100.,100.);
-TH1F *hData_Vtx_y = new TH1F("hData_Vtx_y","hData_Vtx_y",201,-100.,100.);
-TH1F *hData_Vtx_z = new TH1F("hData_Vtx_z","hData_Vtx_z",201,-100.,100.);
-TH1F *hData_passesHTFilter = new TH1F("hData_passesHTFilter","hData_passesHTFilter",3.,0.,2.);
-   
-    //reco with filters
-TH1F *hData_Vtx_reco_x = new TH1F("hData_Vtx_reco_x","hData_Vtx_reco_x",201,-100.,100.);
-TH1F *hData_Vtx_reco_y = new TH1F("hData_Vtx_reco_y","hData_Vtx_reco_y",201,-100.,100.);
-TH1F *hData_Vtx_reco_z = new TH1F("hData_Vtx_reco_z","hData_Vtx_reco_z",201,-100.,100.);
-TH1F *hData_Vtx_reco_Ntrk = new TH1F("hData_Vtx_reco_Ntrk","hData_Vtx_reco_Ntrk",101,0.,100.);
-TH1F *hData_Vtx_reco_Chi2 = new TH1F("hData_Vtx_reco_Chi2","hData_Vtx_reco_Chi2",101,0.,100);
-
-//deltax
-
-  TH1F*    hData_Vtx_mva_dx = new TH1F("hData_Vtx_mva_dx","hData_Vtx_mva_dx",101,-0.1,0.1);
-  TH1F*    hData_Vtx_mva_dy = new TH1F("hData_Vtx_mva_dy","hData_Vtx_mva_dy",101,-0.1,0.1);
-  TH1F*    hData_Vtx_mva_dz = new TH1F("hData_Vtx_mva_dz","hData_Vtx_mva_dz",101,-0.1,0.1);
-
-  TH1F*    hData_Vtx_reco_dx = new TH1F("hData_Vtx_reco_dx","hData_Vtx_reco_dx",101,-0.1,0.1);
-  TH1F*    hData_Vtx_reco_dy = new TH1F("hData_Vtx_reco_dy","hData_Vtx_reco_dy",101,-0.1,0.1);
-  TH1F*    hData_Vtx_reco_dz = new TH1F("hData_Vtx_reco_dz","hData_Vtx_reco_dz",101,-0.1,0.1);
-
-
- TH1F*     hData_Axis12_dR = new TH1F("hData_Axis12_dR","hData_Axis12_dR",101,0,5);
-
-///////////////////////////////////////////////////////////////////
-
- if (fChain == 0) return;
-
- Long64_t nentries = fChain->GetEntriesFast();
- std::cout << "Total Entries : " << nentries << std::endl;
+  TH1F*   hData_track_dpt           = new TH1F("hData_track_dpt","hData_track_dpt",100,0.,15.);
+  TH1F*   hData_track_deta          = new TH1F("hData_track_deta","hData_track_deta",201,-6.5,6.5);
+  TH1F*   hData_track_dphi0         = new TH1F("hData_track_dphi0","hData_track_dphi0",101,-3.2,3.2);
+  TH1F*   hData_track_dphi          = new TH1F("hData_track_dphi","hData_track_dphi",101,-3.2,3.2);
   
- Long64_t nbytes = 0, nb = 0;
+  TH3F*    hData_track_dpt_eta_dphi0   = new TH3F("hData_track_dpt_eta_dphi0","hData_track_dpt_eta_dphi0",51,0.,1,51,-0.3,0.3,51,-0.3,0.3);
 
-//  int nRecoTracks=0;
-//  int maxSize=0;
- int nJets=0; 
+  TH2F*    hData_Hemi_Vtx_dpt_deta     = new TH2F("hData_Hemi_Vtx_dpt_deta","hData_Hemi_Vtx_dpt_deta",51,0.,2,51,-1,1);
+  TH2F*    hData_Hemi_Vtx_deta_dphi0   = new TH2F("hData_Hemi_Vtx_deta_dphi0","hData_Hemi_Vtx_deta_dphi0",51,-1,1,51,-1,1);
+  TH2F*    hData_Hemi_Vtx_dpt_dphi0    = new TH2F("hData_Hemi_Vtx_dpt_dphi0","hData_Hemi_Vtx_dpt_dphi0",51,0.,2,51,-1,1);
 
- int allevents = 0;
- int itest = 0;
+  TH1F*    hData_Hemi_Vtx_bkg_r            = new TH1F("hData_Hemi_Vtx_bkg_r","hData_Hemi_Vtx_bkg_r",1001,0,50);
+  TH1F*    hData_Hemi_Vtx_bkg_z            = new TH1F("hData_Hemi_Vtx_bkg_z","hData_Hemi_Vtx_bkg_z",401,-200,200);
+  TH2F*    hData_Hemi_Vtx_bkg_rvsz         = new TH2F("hData_Hemi_Vtx_bkg_rvsz","hData_Hemi_Vtx_bkg_rvsz",401,-200,200,1001,5,50);
 
+  TH1F*    hData_Hemi_Vtx_r            = new TH1F("hData_Hemi_Vtx_r","hData_Hemi_Vtx_r",1001,0,50);
+  TH1F*    hData_Hemi_Vtx_z            = new TH1F("hData_Hemi_Vtx_z","hData_Hemi_Vtx_z",401,-200,200);
+  TH2F*    hData_Hemi_Vtx_rvsz         = new TH2F("hData_Hemi_Vtx_rvsz","hData_Hemi_Vtx_rvsz",401,-200,200,1001,5,50);
+
+  TH1F*    hData_track_PU_dz            = new TH1F("hData_track_PU_dz","hData_track_PU_dz",101,-50,50);
+  TH1F*    hData_track_PU_dxy           = new TH1F("hData_track_PU_dxy","hData_track_PU_dxy",101,-50,50);
+  TH2F*    hData_track_PU_dxyvsdz       = new TH2F("hData_track_PU_dxyvsdz","hData_track_PU_dxyvsdz",101,-50,50,101,-50,50);
+
+  TH1F*    hData_track_dxy            = new TH1F("hData_track_dxy","hData_track_dxy",101,-50,50);       
+  TH1F*    hData_track_dz             = new TH1F("hData_track_dz","hData_track_dz",101,-50,50);
+  TH2F*    hData_track_dxyvsdz       = new TH2F("hData_track_dxyvsdz","hData_track_dxyvsdz",101,-50,50,101,-50,50);
+
+//---------------------13/03/223-------------------//
+  TH1F*   hData_dR_GenReco           = new TH1F("hData_dR_GenReco","hData_dR_GenReco",201,0,6);
+  TH1F*   hData_dR_GenGen            = new TH1F("hData_dR_GenGen","hData_dR_GenGen",201,0,6);
+  TH1F*   hData_dR_RecoReco          = new TH1F("hData_dR_RecoReco","hData_dR_RecoReco",201,0,6);         
+  
+
+  TH2F*          hData_Yc_xy       = new TH2F("hData_Yc_xy","hData_Yc_xy",601,-25,25,601,-25,25);
+  TH2F*          hData_SecInt_xy   = new TH2F("hData_SecInt_xy","hData_SecInt_xy",601,-25,25,601,-25,25);
+  TH1F*          hData_K0Mass      = new TH1F("hData_K0Mass","hData_K0Mass",101,0.42,0.58);
+  TH1F*          hData_L0Mass      = new TH1F("hData_L0Mass","hData_L0Mass",101,1.06,1.18);
+
+  TH1F*          hData_Hemi_Vtx_dist_rel = new TH1F("hData_Hemi_Vtx_dist_rel","hData_Hemi_Vtx_dist_rel",50,0,100);
+
+  TH1F*          hData_MVAVal     = new TH1F("hData_MVAVal","hData_MVAVal",101,-1,1);
+  TH1F*          hData_IsFromLLP  =  new TH1F("hData_IsFromLLP","hData_IsFromLLP",6,-1,5);
+  TH2F*          hGenReco_dR   = new TH2F("hGenReco_dR","hGenReco_dR",201,0,6,201,0,6);
+
+  // TH2F*          hSignalEff = new TH2F("hSignalEff","hSignalEff",20,-1,1,100,0,10000) ;
+  // TH2F*          hBkgEff = new TH2F("hBkgEff","hBkgEff",20,-1,1,100,0,10000);
+    TH1F*          hSignalEff = new TH1F("hSignalEff","hSignalEff",201,-1,1) ;
+  TH1F*          hBkgEff = new TH1F("hBkgEff","hBkgEff",201,-1,1);
+  TH2F*          hBkfEff_SigEff = new TH2F("hBkfEff_SigEff","hBkfEff_SigEff",201,0,1,201,0,1);
+  TH1F*          h_sig = new TH1F("h_sig","h_sig",201,-1,1);
+  
+  TH2F*          hData_Veto = new TH2F("hData_Veto","hData_Veto",1001,-40,40,1001,40,40);
+     
+///////////////////////////////////////////////////////////////////
+   if (fChain == 0) return;
+int tracks =0;
+int nVertex = 0;
+int allevents = 0;
+      int nSTracks = 0;
+      int nDTracks = 0;
+      float bdtcut = -1;
+      float delta = 0.01;
+      int nStep= 2* abs(bdtcut/delta);
+float nSelecTracks[200] = {0};
+float nDiscardTracks[200] =  {0};
+float sig[200] = {0};
+
+    Long64_t nentries = fChain->GetEntriesFast();
+     std::cout << "Total Entries : " << nentries << std::endl;
+
+   Long64_t nbytes = 0, nb = 0;
+   for (Long64_t jentry=0; jentry<nentries;jentry++) {
+    
+      Long64_t ientry = LoadTree(jentry);
+      
+      if (ientry < 0) break;
+      
+      nb = fChain->GetEntry(jentry);   nbytes += nb;
+      
+      // if (Cut(ientry) < 0) continue;int itest = 0;
+int itest = 0;
  float deltaR;
- float mu_mass = 0.1057, smu_mass = 0.;
+ float mu_mass = 0.1057, smu_mass = 275.;
+ float dRcut = 1.5;
  TLorentzVector v1, v2, v;
 
-float nSignalTracks=0, nBkgTracks=0;
-float n_Mva_SignalTracks=0,n_Mva_BkgTracks=0;
-float SignalEff=0, BkgEff=0;
-// float Mva_SignalEff=0, Mva_BkgEff=0;
-float nTrackingPerfSignal=0;
-float nTrackingPerfBkg=0;
 ////////////////
 // Event loop //
 ////////////////
-
- for (Long64_t jentry=0; jentry<nentries; jentry++) {
-   Long64_t ientry = LoadTree(jentry);
- if (ientry < 0) break;
-   nb = fChain->GetEntry(jentry);   nbytes += nb;
- 
+   
    allevents++;
-   std::cout<< "event: "<< allevents<<std::endl;
    if ( allevents%1000 == 0 ) std::cout << "events : " << allevents << std::endl;
-  
-  //--------------------------//
-//_______Vertex plots_______//
-//--------------------------//
-// std::cout<< "ntrack : "<<std::endl;
 
-
-    //gen//
-    hData_Vtx_x->Fill(tree_LLP1_x);
-    hData_Vtx_y->Fill(tree_LLP1_y);
-    hData_Vtx_z->Fill(tree_LLP1_z);
-    // std::cout<<"gen"<<std::endl;
-    //reco with filters
-    hData_Vtx_reco_x->Fill(tree_Vtx_LLP1_x);
-    hData_Vtx_reco_y->Fill(tree_Vtx_LLP1_y);
-    hData_Vtx_reco_z->Fill(tree_Vtx_LLP1_z);
-
-
-
-    // //reco with mva and filters (version of july 28th)
-    // hData_Vtx_mva_x->Fill(tree_Vtx_mva_LLP1_x);
-    // hData_Vtx_mva_y->Fill(tree_Vtx_mva_LLP1_y);
-    // hData_Vtx_mva_z->Fill(tree_Vtx_mva_LLP1_z);
-    // hData_Vtx_mva_Ntrk->Fill(tree_Vtx_mva_LLP1_nTrks);
-    // hData_Vtx_mva_Chi2->Fill(tree_Vtx_mva_LLP1_NChi2);
-
-    //reco with mva and filters (version of july 26th)
-  //   hData_Vtx_mva_x->Fill(tree_Vtx_mva_LLP1_x);
-  //   hData_Vtx_mva_y->Fill(tree_Vtx_mva_LLP1_y);
-  //   hData_Vtx_mva_z->Fill(tree_Vtx_mva_LLP1_z);
-
- 
-  //  if(tree_Vtx_mva_LLP1_nTrks>=2&&tree_Vtx_mva_LLP1_NChi2>0&&tree_passesHTFilter&&abs(tree_Vtx_mva_LLP1_x-tree_LLP1_x)<0.1)
-  //   {
-  //     if (tree_Vtx_mva_LLP1_NChi2<5)
-  //     {
-  //       hData_Vtx_mva_dx->Fill(tree_Vtx_mva_LLP1_x-tree_LLP1_x);
-  //       hData_Vtx_mva_dy->Fill(tree_Vtx_mva_LLP1_y-tree_LLP1_y);
-  //       hData_Vtx_mva_dz->Fill(tree_Vtx_mva_LLP1_z-tree_LLP1_z);
-  //       hData_Vtx_mva_Ntrk->Fill(tree_Vtx_mva_LLP1_nTrks);
-  //     }
-  //       hData_Vtx_mva_Chi2->Fill(tree_Vtx_mva_LLP1_NChi2);
-  //   }
-  //  if (tree_Vtx_LLP1_nTrks>=2 &&tree_Vtx_LLP1_NChi2>0 && tree_passesHTFilter&&abs(tree_Vtx_LLP1_x-tree_LLP1_x)<0.1)
-  //   {
-  //   hData_Vtx_reco_Chi2->Fill(tree_Vtx_LLP1_NChi2);
-  //         if (tree_Vtx_mva_LLP1_NChi2<5)
-  //     {
-  //       hData_Vtx_reco_dx->Fill(tree_Vtx_LLP1_x-tree_LLP1_x);
-  //       hData_Vtx_reco_dy->Fill(tree_Vtx_LLP1_y-tree_LLP1_y);
-  //       hData_Vtx_reco_dz->Fill(tree_Vtx_LLP1_z-tree_LLP1_z);
-  //       hData_Vtx_reco_Ntrk->Fill(tree_Vtx_LLP1_nTrks);
-  //     }
-  //   }
-
-        //reco with mva and filters (version of july 28th)
-    hData_Vtx_mva_x->Fill(tree_Vtx_Hemi1_mva_x);
-    hData_Vtx_mva_y->Fill(tree_Vtx_Hemi1_mva_y);
-    hData_Vtx_mva_z->Fill(tree_Vtx_Hemi1_mva_z);
-
- 
-   if(tree_Vtx_Hemi1_mva_nTrks>=2&&tree_Vtx_Hemi1_mva_NChi2>0&&tree_passesHTFilter&&abs(tree_Vtx_Hemi1_mva_x-tree_LLP1_x)<0.1)
-    {
-      if (tree_Vtx_Hemi1_mva_NChi2)
-      {
-        hData_Vtx_mva_dx->Fill(tree_Vtx_Hemi1_mva_x-tree_LLP1_x);
-        hData_Vtx_mva_dy->Fill(tree_Vtx_Hemi1_mva_y-tree_LLP1_y);
-        hData_Vtx_mva_dz->Fill(tree_Vtx_Hemi1_mva_z-tree_LLP1_z);
-        hData_Vtx_mva_Ntrk->Fill(tree_Vtx_Hemi1_mva_nTrks);
-      }
-        hData_Vtx_mva_Chi2->Fill(tree_Vtx_Hemi1_mva_NChi2);
-    }
-   if (tree_Vtx_Hemi1_nTrks>=2 &&tree_Vtx_Hemi1_NChi2>0 && tree_passesHTFilter&&abs(tree_Vtx_Hemi1_x-tree_LLP1_x)<0.1)
-    {
-    hData_Vtx_reco_Chi2->Fill(tree_Vtx_Hemi1_NChi2);
-          if (tree_Vtx_Hemi1_NChi2<5)
-      {
-        hData_Vtx_reco_dx->Fill(tree_Vtx_Hemi1_x-tree_LLP1_x);
-        hData_Vtx_reco_dy->Fill(tree_Vtx_Hemi1_y-tree_LLP1_y);
-        hData_Vtx_reco_dz->Fill(tree_Vtx_Hemi1_z-tree_LLP1_z);
-        hData_Vtx_reco_Ntrk->Fill(tree_Vtx_Hemi1_nTrks);
-      }
-    }
-// //$$
+//$$
 //   itest++;
 //   if ( itest > 10 ) break;
 //  std::cout << " " << std::endl;
 //  std::cout << " Event " << eventNumber << std::endl;
-// //$$
-
-///////////////////////
-// ZMu filter
+//$$
 
    int ngenpart =  tree_genParticle_pt->size();
 
-   hDataAll_nZMu->Fill( tree_NbrOfZCand );
-   bool ZMu = false;
-   if ( tree_NbrOfZCand > 0 ) ZMu = true;
-//$$
- if ( ngenpart > 0 && !ZMu ) continue; // only for MC at the moment
-//$$
-    int HTfilter =  tree_passesHTFilter->size();
-  
-  for (int m=0; m<HTfilter ; m++)
-    {
-      hData_passesHTFilter->Fill(tree_passesHTFilter->at(m));
-      if (tree_passesHTFilter->at(m)>0)
-        {
-              hData_Axis12_dR->Fill(tree_axis12_dR);
-        }
-      // std::cout << HTfilter << std::endl;
-    }
+// ///////////////////////
+// // ZMu filter
+// 
+//    hDataAll_nZMu->Fill( tree_NbrOfZCand );
+//    bool ZMu = false;
+//    if ( tree_NbrOfZCand > 0 ) ZMu = true;
+// //$$
+//  if ( ngenpart > 0 && !ZMu ) continue; // only for MC at the moment
+// //$$
 
-///////////////////////already computed in the newest ntuple
+
+///////////////////////
 // Jet for HT computation
-
+if (tree_Filter)
+{
    float HTjet = 0.;
 
 // Jets PF AK4
-   int njetall = tree_AK4Slimmedjet_pt->size();
-
+   int njetall = tree_jet_pt->size();
    for (int i=0; i<njetall; i++)    // Loop on jet
    {
-     float jet_pt  = tree_AK4Slimmedjet_pt->at(i);
-     float jet_eta = tree_AK4Slimmedjet_eta->at(i);
-     float jet_phi = tree_AK4Slimmedjet_phi->at(i);
-   if ( jet_pt < PtMin ) continue;
-   if ( abs(jet_eta) > EtaMax ) continue;
+     float jet_pt  = tree_jet_pt->at(i);
+     float jet_eta = tree_jet_eta->at(i);
+     float jet_phi = tree_jet_phi->at(i);
+   if ( jet_pt < 20. ) continue;        // used in HTFilter !
+   if ( abs(jet_eta) > 2.4 ) continue;  // used in HTFilter !
      hDataAll_Jet_pt->Fill( jet_pt );
      hDataAll_Jet_eta->Fill( jet_eta );
      hDataAll_Jet_phi->Fill( jet_phi );
      HTjet += jet_pt;
    }	   // end Loop on jet
-
    hDataAll_Jet_njet->Fill( njetall );
    hDataAll_Jet_HT->Fill( HTjet );
-std::cout<<"njetall "<<njetall<<std::endl;
-std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
+
 //$$
- if ( HTjet < TagCut ) continue; //seuil minimum sur HTjet BUGGGGGGG
+//$$ if ( HTjet < TagCut ) continue; 
 //$$
-      
+
 
 ///////////////////////
 // reco muons
 
-   int nmu =  tree_slimmedmuon_pt->size();
+   int nmu =  tree_muon_pt->size();
    hDataAll_nMu->Fill( nmu );
    int nmuglob = 0;
    float muptmax = 0.;
    TLorentzVector vmuon[2];
 
    for (int i=0; i<nmu; i++) {	     // Loop on reco muons
-   if ( !tree_slimmedmuon_isGlobalMuon->at(i) ) continue;//Pour avoir des muons de qualit�s
-     float mupt1  = tree_slimmedmuon_pt->at(i);
-   if ( mupt1 < 10. ) continue;//Minimum threshold for the pt of muons defined by other papers
+   if ( !tree_muon_isGlobal->at(i) ) continue;
+     float mupt1  = tree_muon_pt->at(i);
+   if ( mupt1 < 10. ) continue;
      if ( mupt1 > muptmax ) muptmax = mupt1;
      nmuglob++;
    }	   // end loop on reco muons
 
    hDataAll_nMuGlob->Fill( nmuglob );
    hDataAll_Mu_ptmax->Fill( muptmax );
-   if ( muptmax > 28. ) hDataAll_nMuGlob_ptGT28->Fill( nmuglob ); //28GeV threshold for the pt of muons defined by other papers
+   if ( muptmax > 25. ) hDataAll_nMuGlob_ptGT28->Fill( nmuglob );
 
 //$$
- if ( muptmax < 28. || nmuglob < 2 ) continue; //Il nous au moins deux muons (produits par les smuons qui respectent le seuil �nergetique)
+//  if ( muptmax < 25. || nmuglob < 2 ) continue;  // used in HTFilter ! 
 //$$
    
 
 ///////////////////////
 // Primary Vertex
 
-   int nPV =  tree_vtx_PosX->size();
-   float PVx = tree_vtx_PosX->at(0);//l'index 0 donne le PV! 
-   float PVy = tree_vtx_PosY->at(0);
-   float PVz = tree_vtx_PosZ->at(0);
+   int nPV =  tree_nPV;
+   float PVx = tree_PV_x;//tree_PV_x->at(0)
+   float PVy = tree_PV_y;
+   float PVz = tree_PV_z;
 
-   float GenPVx, GenPVy, GenPVz;
-   
-   for (int i=0; i<ngenpart; i++)    // Loop on GenParticle : ngenpart computed line 279
-   {
-     float pdgId = tree_genParticle_pdgId->at(i); 
-// smuon 1000013, abs for AP
-     if ( abs(pdgId) == 1000013 ) {
-       GenPVx = tree_genParticle_vx->at(i);
-       GenPVy = tree_genParticle_vy->at(i);
-       GenPVz = tree_genParticle_vz->at(i);
-       smu_mass = tree_genParticle_mass->at(i);
-       break;
-     }
-   }    // end Loop on GenParticle
+   float GenPVx = tree_GenPVx;
+   float GenPVy = tree_GenPVy;
+   float GenPVz = tree_GenPVz;
    
 
 ///////////////////////
-// reco muons with ZMu filter
+// reco muons 
 
    bool ZMuRec = false;
    int PFiso, MVAiso, CutBasedId;
@@ -626,39 +630,20 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
    float mupt1, mueta1, muphi1, mupt2, mueta2, muphi2;
 
    for (int i=0; i<nmu; i++) {	     // Loop on reco muons
-   if ( !tree_slimmedmuon_isGlobalMuon->at(i) ) continue;//Need global muons
-     mupt1  = tree_slimmedmuon_pt->at(i);
-   if ( mupt1 < 10. ) continue;//Zmu filter
-     dVr = TMath::Sqrt( (tree_slimmedmuon_vx->at(i)-PVx)*(tree_slimmedmuon_vx->at(i)-PVx) + (tree_slimmedmuon_vy->at(i)-PVy)*(tree_slimmedmuon_vy->at(i)-PVy) );
-     dVz = tree_slimmedmuon_vz->at(i)-PVz;
+   if ( !tree_muon_isGlobal->at(i) ) continue;
+     mupt1  = tree_muon_pt->at(i);
+   if ( mupt1 < 10. ) continue;
+     dVr = TMath::Sqrt( (tree_muon_x->at(i)-PVx)*(tree_muon_x->at(i)-PVx) + (tree_muon_y->at(i)-PVy)*(tree_muon_y->at(i)-PVy) );
+     dVz = tree_muon_z->at(i)-PVz;
      hData_Mu_dVr->Fill( dVr );
      hData_Mu_dVz->Fill( dVz );
-   if ( dVr > 0.1 || abs(dVz) > 0.2 ) continue;// on veut un bon fit pour nos PV d'ou un seuil maximum sur les distances
-     //pas forcémetn dasntracking perf
+  //  if ( dVr > 0.1 || abs(dVz) > 0.2 ) continue;
 
-     mueta1 = tree_slimmedmuon_eta->at(i);
-     muphi1 = tree_slimmedmuon_phi->at(i);
+     mueta1 = tree_muon_eta->at(i);
+     muphi1 = tree_muon_phi->at(i);
      hData_Mu_pt->Fill( mupt1 );
      hData_Mu_eta->Fill( mueta1 );
      hData_Mu_phi->Fill( muphi1 );
-
-     PFiso = 0;
-     if      ( tree_slimmedmuon_PFisoVeryTight->at(i) ) PFiso = 4;
-     else if ( tree_slimmedmuon_PFisoTight->at(i) )     PFiso = 3;
-     else if ( tree_slimmedmuon_PFisoMedium->at(i) )    PFiso = 2;
-     else if ( tree_slimmedmuon_PFisoLoose->at(i) )     PFiso = 1;
-     hData_Mu_PFiso->Fill( PFiso );
-     MVAiso = 0;
-     if      ( tree_slimmedmuon_MVAisoTight->at(i) )    MVAiso = 3;
-     else if ( tree_slimmedmuon_MVAisoMedium->at(i) )   MVAiso = 2;
-     else if ( tree_slimmedmuon_MVAisoLoose->at(i) )    MVAiso = 1;
-     hData_Mu_MVAiso->Fill( MVAiso );
-     CutBasedId = 0;
-     if      ( tree_slimmedmuon_CutBasedIdTight->at(i) )    CutBasedId = 4;
-     else if ( tree_slimmedmuon_CutBasedIdMediumPrompt->at(i) )   CutBasedId = 3;
-     else if ( tree_slimmedmuon_CutBasedIdMedium->at(i) )   CutBasedId = 2;
-     else if ( tree_slimmedmuon_CutBasedIdLoose->at(i) )    CutBasedId = 1;
-     hData_Mu_CutBasedId->Fill( CutBasedId );
 
      v1.SetPtEtaPhiM(mupt1,mueta1,muphi1,mu_mass);
      vmuon[0].SetPtEtaPhiM(mupt1,mueta1,muphi1,0);
@@ -666,20 +651,20 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
 
    if ( i == nmu-1 ) continue;
      for (int j=i+1; j<nmu; j++) {	   // Loop on other reco muons
-     if ( !tree_slimmedmuon_isGlobalMuon->at(j) ) continue;
-     if ( tree_slimmedmuon_charge->at(i) == tree_slimmedmuon_charge->at(j) ) continue;
-       dVr = TMath::Sqrt( (tree_slimmedmuon_vx->at(j)-PVx)*(tree_slimmedmuon_vx->at(j)-PVx) + (tree_slimmedmuon_vy->at(j)-PVy)*(tree_slimmedmuon_vy->at(j)-PVy) );
-       dVz = tree_slimmedmuon_vz->at(j)-PVz;
-     if ( dVr > 0.1 || abs(dVz) > 0.2 ) continue;
-       mupt2  = tree_slimmedmuon_pt->at(j);
+     if ( !tree_muon_isGlobal->at(j) ) continue;
+     if ( tree_muon_charge->at(i) == tree_muon_charge->at(j) ) continue;
+       dVr = TMath::Sqrt( (tree_muon_x->at(j)-PVx)*(tree_muon_x->at(j)-PVx) + (tree_muon_y->at(j)-PVy)*(tree_muon_y->at(j)-PVy) );
+       dVz = tree_muon_z->at(j)-PVz;
+    //  if ( dVr > 0.1 || abs(dVz) > 0.2 ) continue;
+       mupt2  = tree_muon_pt->at(j);
      if ( mupt2 < 10. ) continue;
-     if ( mupt1 < 28. && mupt2 < 28. ) continue;//Zmu FIlter
-       mueta2 = tree_slimmedmuon_eta->at(j);
-       muphi2 = tree_slimmedmuon_phi->at(j);
+     if ( mupt1 < 25. && mupt2 < 25. ) continue;
+       mueta2 = tree_muon_eta->at(j);
+       muphi2 = tree_muon_phi->at(j);
        v2.SetPtEtaPhiM(mupt2,mueta2,muphi2,mu_mass);
        vmuon[1].SetPtEtaPhiM(mupt2,mueta2,muphi2,0);
        v = v1 + v2;
-       if ( v.Mag() > Mmumu ) {//Mag pour masse invariante (magnitude)
+       if ( v.Mag() > Mmumu ) {
          Mmumu = v.Mag();
 	 imu1 = i;
 	 imu2 = j;
@@ -690,26 +675,26 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
    hData_nMuRec->Fill( nmurec );
    hData_MuMu_mass->Fill( Mmumu );
 //$$
-   if ( Mmumu < 60. ) continue;
+//$$   if ( Mmumu < 60. ) continue;
+   if ( Mmumu < 10. ) continue;
 //$$
 
-   if ( tree_slimmedmuon_pt->at(imu2) > tree_slimmedmuon_pt->at(imu1) ) {
+   if ( tree_muon_pt->at(imu2) > tree_muon_pt->at(imu1) ) {
      int imu0 = imu2;
-     imu2 = imu1;//muons reco with imu1 having the highest pt
+     imu2 = imu1;
      imu1 = imu0;
      v = vmuon[0];
      vmuon[0] = vmuon[1];
      vmuon[1] = v;
    }
-   mupt1  = tree_slimmedmuon_pt->at(imu1);
-   mueta1 = tree_slimmedmuon_eta->at(imu1);
-   muphi1 = tree_slimmedmuon_phi->at(imu1);
-   mupt2  = tree_slimmedmuon_pt->at(imu2);
-   mueta2 = tree_slimmedmuon_eta->at(imu2);
-   muphi2 = tree_slimmedmuon_phi->at(imu2);
+   mupt1  = tree_muon_pt->at(imu1);
+   mueta1 = tree_muon_eta->at(imu1);
+   muphi1 = tree_muon_phi->at(imu1);
+   mupt2  = tree_muon_pt->at(imu2);
+   mueta2 = tree_muon_eta->at(imu2);
+   muphi2 = tree_muon_phi->at(imu2);
    hData_Mu_pt1->Fill( mupt1 );
    hData_Mu_pt2->Fill( mupt2 );
-
 
    hData_nPV->Fill(nPV);
    hData_PVx->Fill( PVx );
@@ -720,15 +705,15 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
    hGen_PVy->Fill( GenPVy );
    hGen_PVz->Fill( GenPVz );
 
-   hDataGen_PV_dx->Fill( PVx - GenPVx );//gives gaussian centered on 0
-   hDataGen_PV_dy->Fill( PVy - GenPVy );//gives gaussian centered on 0
-   hDataGen_PV_dz->Fill( PVz - GenPVz );//gives gaussian centered on 0
+   hDataGen_PV_dx->Fill( PVx - GenPVx );
+   hDataGen_PV_dy->Fill( PVy - GenPVy );
+   hDataGen_PV_dz->Fill( PVz - GenPVz );
 
 
 ///////////////////////
 // GenParticle
 
-//  std::cout << std::endl; 
+
 
    int ntop=0, nstoq=0, nqtop=0, nlepW=0, lep1=0, lep2=0;
    float Gen_neu1_pt, Gen_neu1_eta, Gen_neu1_phi, Gen_neu1_m; 
@@ -743,6 +728,7 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
    
    int smu[2], neu[2], genmu[2], top[2], sq1[2], sq3[2], nneu = 0, ngenmu = 0;
    int qsmu[2], qgenmu[2]; 
+   int ngenb = 0, ngenc = 0;
    TLorentzVector vsmu[2], vneu[2], vgenmu[2], vtop[2], vsq1[2], vsq3[2]; 
    float bg1, bg2, gamma, ctau, dRneuneu = 0.; 
    for (int k=0; k<2; k++) {
@@ -754,7 +740,7 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
      genmu[k] = -1;
    }
    
-   for (int i=0; i<ngenpart; i++)    // Loop on GenParticle, ngenpart can be uo to one thousand, basically few hundreds
+   for (int i=0; i<ngenpart; i++)    // Loop on GenParticle
    {
      float pdgId = tree_genParticle_pdgId->at(i); 
      float mother_pdgId = tree_genParticle_mother_pdgId->at(i); 
@@ -765,7 +751,7 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
 
 //  std::cout << "id mother status " << pdgId << " " << mother_pdgId << " " << tree_genParticle_statusCode->at(i) 
 //            << " pt " << tree_genParticle_pt->at(i) 
-// 	   << " xyz " << tree_genParticle_vx->at(i) << " " << tree_genParticle_vy->at(i) << " " << tree_genParticle_vz->at(i) << std::endl; 
+// 	   << " xyz " << tree_genParticle_x->at(i) << " " << tree_genParticle_y->at(i) << " " << tree_genParticle_z->at(i) << std::endl; 
 
 // muon from smuon
      if ( abs(pdgId) == 13 && abs(mother_pdgId) == 1000013 ) {
@@ -784,7 +770,7 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
        ngenmu++;
      }
 
-// neutralino && smuon 1000013 : Si on a un neutralino qui provient d'un smuon alors...
+// neutralino
      if ( pdgId == 1000023 && abs(mother_pdgId) == 1000013 ) {
        hGen_neu_pt->Fill( Gen_pt );
        hGen_neu_eta->Fill( Gen_eta );
@@ -816,9 +802,9 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
          Gen_top1_pt  = tree_genParticle_pt->at(i);
          Gen_top1_eta = tree_genParticle_eta->at(i);
          Gen_top1_phi = tree_genParticle_phi->at(i);
-         Gen_top1_x   = tree_genParticle_vx->at(i);
-         Gen_top1_y   = tree_genParticle_vy->at(i);
-         Gen_top1_z   = tree_genParticle_vz->at(i);
+         Gen_top1_x   = tree_genParticle_x->at(i);
+         Gen_top1_y   = tree_genParticle_y->at(i);
+         Gen_top1_z   = tree_genParticle_z->at(i);
          Gen_top1_r = TMath::Sqrt( (Gen_top1_x-GenPVx)*(Gen_top1_x-GenPVx) 
 	                         + (Gen_top1_y-GenPVy)*(Gen_top1_y-GenPVy) );
          Gen_top1_d = TMath::Sqrt( Gen_top1_r*Gen_top1_r + (Gen_top1_z-GenPVz)*(Gen_top1_z-GenPVz) );
@@ -831,7 +817,7 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
          ntop++;
 //  std::cout << " Top " << ntop << " pdgId " << pdgId
 //            << "  pt eta phi " << tree_genParticle_pt->at(i) << " " << tree_genParticle_eta->at(i) << " " << tree_genParticle_phi->at(i)
-//            << "  x y z " << tree_genParticle_vx->at(i) << " " << tree_genParticle_vy->at(i) << " " << tree_genParticle_vz->at(i)
+//            << "  x y z " << tree_genParticle_x->at(i) << " " << tree_genParticle_y->at(i) << " " << tree_genParticle_z->at(i)
 //            << std::endl;
        }
        else if ( top[1] < 0 ) {
@@ -842,9 +828,9 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
          Gen_top2_pt  = tree_genParticle_pt->at(i);
          Gen_top2_eta = tree_genParticle_eta->at(i);
          Gen_top2_phi = tree_genParticle_phi->at(i);
-         Gen_top2_x   = tree_genParticle_vx->at(i);
-         Gen_top2_y   = tree_genParticle_vy->at(i);
-         Gen_top2_z   = tree_genParticle_vz->at(i);
+         Gen_top2_x   = tree_genParticle_x->at(i);
+         Gen_top2_y   = tree_genParticle_y->at(i);
+         Gen_top2_z   = tree_genParticle_z->at(i);
          Gen_top2_r = TMath::Sqrt( (Gen_top2_x-GenPVx)*(Gen_top2_x-GenPVx) 
 	 			 + (Gen_top2_y-GenPVy)*(Gen_top2_y-GenPVy) );
          Gen_top2_d = TMath::Sqrt( Gen_top2_r*Gen_top2_r + (Gen_top2_z-GenPVz)*(Gen_top2_z-GenPVz) );
@@ -857,7 +843,7 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
          ntop++;
 //  std::cout << " Top " << ntop << " pdgId " << pdgId
 //            << "  pt eta phi " << tree_genParticle_pt->at(i) << " " << tree_genParticle_eta->at(i) << " " << tree_genParticle_phi->at(i)
-//            << "  x y z " << tree_genParticle_vx->at(i) << " " << tree_genParticle_vy->at(i) << " " << tree_genParticle_vz->at(i)
+//            << "  x y z " << tree_genParticle_x->at(i) << " " << tree_genParticle_y->at(i) << " " << tree_genParticle_z->at(i)
 //            << std::endl;
 
        }
@@ -871,16 +857,16 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
        hGen_top_dVphi->Fill( abs(deltaPhi) );
      }
 
-// quarks from top or W+
+// quarks from top
      if ( abs(pdgId) >= 1 && abs(pdgId) <= 5 
           && (abs(mother_pdgId) == 6 || abs(mother_pdgId) == 24) ) {
        dV = 10000.;
        int iLLP = -1;
        for (int k=0; k<2; k++) {
        if ( top[k] < 0 ) continue;
-         dV1 = (tree_genParticle_vx->at(i) - tree_genParticle_vx->at(top[k]))*(tree_genParticle_vx->at(i) - tree_genParticle_vx->at(top[k]))
-             + (tree_genParticle_vy->at(i) - tree_genParticle_vy->at(top[k]))*(tree_genParticle_vy->at(i) - tree_genParticle_vy->at(top[k]))
-             + (tree_genParticle_vz->at(i) - tree_genParticle_vz->at(top[k]))*(tree_genParticle_vz->at(i) - tree_genParticle_vz->at(top[k]));
+         dV1 = (tree_genParticle_x->at(i) - tree_genParticle_x->at(top[k]))*(tree_genParticle_x->at(i) - tree_genParticle_x->at(top[k]))
+             + (tree_genParticle_y->at(i) - tree_genParticle_y->at(top[k]))*(tree_genParticle_y->at(i) - tree_genParticle_y->at(top[k]))
+             + (tree_genParticle_z->at(i) - tree_genParticle_z->at(top[k]))*(tree_genParticle_z->at(i) - tree_genParticle_z->at(top[k]));
          if ( dV1 < dV ) {
 	   iLLP = k;
 	   dV = dV1;
@@ -894,10 +880,13 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
 
          deltaR = DeltaR( vneu[iLLP].Eta(), vneu[iLLP].Phi(), Gen_eta, Gen_phi );
          deltaPhi = DeltaPhi( vneu[iLLP].Phi(), Gen_phi );
-         hGen_neuqtop_DR->Fill( deltaR );//gap between quakr from top or W decay and neutralino
+         hGen_neuqtop_DR->Fill( deltaR );
          hGen_neuqtop_dphi->Fill( abs(deltaPhi) );
          hGen_neuqtop_deta->Fill( abs( Gen_eta - vneu[iLLP].Eta() ) );
          nqtop++;
+	 
+	 if ( abs(pdgId) == 5 ) ngenb++;
+	 if ( abs(pdgId) == 4 ) ngenc++;
        }
      }
 
@@ -907,12 +896,11 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
        int iLLP = -1;
        for (int k=0; k<2; k++) {
        if ( top[k] < 0 ) continue;
-         dV1 = (tree_genParticle_vx->at(i) - tree_genParticle_vx->at(top[k]))*(tree_genParticle_vx->at(i) - tree_genParticle_vx->at(top[k]))
-             + (tree_genParticle_vy->at(i) - tree_genParticle_vy->at(top[k]))*(tree_genParticle_vy->at(i) - tree_genParticle_vy->at(top[k]))
-             + (tree_genParticle_vz->at(i) - tree_genParticle_vz->at(top[k]))*(tree_genParticle_vz->at(i) - tree_genParticle_vz->at(top[k]));
+         dV1 = (tree_genParticle_x->at(i) - tree_genParticle_x->at(top[k]))*(tree_genParticle_x->at(i) - tree_genParticle_x->at(top[k]))
+             + (tree_genParticle_y->at(i) - tree_genParticle_y->at(top[k]))*(tree_genParticle_y->at(i) - tree_genParticle_y->at(top[k]))
+             + (tree_genParticle_z->at(i) - tree_genParticle_z->at(top[k]))*(tree_genParticle_z->at(i) - tree_genParticle_z->at(top[k]));
          if ( dV1 < dV ) {
 	   iLLP = k;
-
 	   dV = dV1;
 	 }
        }
@@ -928,8 +916,8 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
          hGen_neulepW_dphi->Fill( abs(deltaPhi) );
          hGen_neulepW_deta->Fill( abs( Gen_eta - vneu[iLLP].Eta() ) );
          nlepW++;
-         	 if ( iLLP == 0 ) lep1 = abs(pdgId);
-	       if ( iLLP == 1 ) lep2 = abs(pdgId);
+	 if ( iLLP == 0 ) lep1 = abs(pdgId);
+	 if ( iLLP == 1 ) lep2 = abs(pdgId);
        }
      }
 
@@ -968,17 +956,19 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
    hGen_qtop->Fill( nqtop );
    hGen_stoq->Fill( nstoq );
    hGen_lepW->Fill( nlepW );
+   hGen_genb->Fill( ngenb );
+   hGen_genc->Fill( ngenc );
 
 // smuon
    int itest_smu = -1;
    if ( ngenmu == 2 && nneu == 2 ) {
      itest_smu = 0;
-     vsmu[0] = vgenmu[0] + vneu[0];//conservation of genreated quadrivector
+     vsmu[0] = vgenmu[0] + vneu[0];
      vsmu[1] = vgenmu[1] + vneu[1];
      float test_Msmu0 = vsmu[0].Mag() / smu_mass - 1.;
      float test_Msmu1 = vsmu[1].Mag() / smu_mass - 1.;
-     hGen_smu_testM->Fill( test_Msmu0 );//LOOKAT: 0-peak
-     hGen_smu_testM->Fill( test_Msmu1 );//LOOKAT: 0-peak
+     hGen_smu_testM->Fill( test_Msmu0 );
+     hGen_smu_testM->Fill( test_Msmu1 );
      if ( abs(test_Msmu0) > 0.1 || abs(test_Msmu1) > 0.1 ) {
        itest_smu = 1;
        vsmu[0] = vgenmu[1] + vneu[0];
@@ -996,16 +986,16 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
      hGen_smusmu_DR->Fill( deltaR );
      hGen_smusmu_dphi->Fill( abs(deltaPhi) );
    }
-   hGen_smu_test->Fill( itest_smu );    //LOOKAT :0
+   hGen_smu_test->Fill( itest_smu );     
    
    if ( ngenmu == 2 ) {
      v = vgenmu[0] + vgenmu[1];
-     hGen_mumu_mass->Fill( v.Mag() );//LOOKAT should be sup to 60 GeV with ZMu filter (true)
+     hGen_mumu_mass->Fill( v.Mag() );
      for (int i=0; i<2; i++) {
        deltaR = DeltaR( vgenmu[i].Eta(), vgenmu[i].Phi(), vsmu[i].Eta(), vsmu[i].Phi() );
        deltaPhi = DeltaPhi( vgenmu[i].Phi(), vsmu[i].Phi() );
-       hGen_muonsmu_DR->Fill( deltaR );//LOOKAT "^\" <2
-       hGen_muonsmu_dphi->Fill( abs(deltaPhi) );//LOOKAT "^\"<2
+       hGen_muonsmu_DR->Fill( deltaR );
+       hGen_muonsmu_dphi->Fill( abs(deltaPhi) );
      }
    }
 
@@ -1021,8 +1011,8 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
        hGen_neusmu_dphi->Fill( abs(deltaPhi) );
        deltaR = DeltaR( vgenmu[i].Eta(), vgenmu[i].Phi(), vneu[i].Eta(), vneu[i].Phi() );
        deltaPhi = DeltaPhi( vgenmu[i].Phi(), vneu[i].Phi() );
-       hGen_neumu_DR->Fill( deltaR );//LOOKAT "^\"<2
-       hGen_neumu_dphi->Fill( abs(deltaPhi) );//LOOKAT "^\"<2
+       hGen_neumu_DR->Fill( deltaR );
+       hGen_neumu_dphi->Fill( abs(deltaPhi) );
      }
    }
 
@@ -1033,9 +1023,9 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
         + (Gen_top2_y - Gen_top1_y)*(Gen_top2_y - Gen_top1_y)
         + (Gen_top2_z - Gen_top1_z)*(Gen_top2_z - Gen_top1_z);
      dV = TMath::Sqrt(dV);
-     hGen_toptop_dV->Fill( dV );//LOOKAT "^\\\\\" -> 200 cm
+     hGen_toptop_dV->Fill( dV );
      deltaPhi = DeltaPhi( Gen_top2_Vphi, Gen_top1_Vphi );
-     hGen_toptop_dVphi->Fill( abs(deltaPhi) );//LOOKAT: close to 3 rad (pi)
+     hGen_toptop_dVphi->Fill( abs(deltaPhi) );
    }
 
    if ( nstoq == 4 ) {
@@ -1052,14 +1042,14 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
        hGen_neusq_deta->Fill( abs(vsq3[i].Eta() - vneu[i].Eta()) );
 
        if ( top[i] >= 0 ) {
-         dV = (tree_genParticle_vx->at(sq1[i]) - tree_genParticle_vx->at(top[i]))*(tree_genParticle_vx->at(sq1[i]) - tree_genParticle_vx->at(top[i]))
-            + (tree_genParticle_vy->at(sq1[i]) - tree_genParticle_vy->at(top[i]))*(tree_genParticle_vy->at(sq1[i]) - tree_genParticle_vy->at(top[i]))
-            + (tree_genParticle_vz->at(sq1[i]) - tree_genParticle_vz->at(top[i]))*(tree_genParticle_vz->at(sq1[i]) - tree_genParticle_vz->at(top[i]));
+         dV = (tree_genParticle_x->at(sq1[i]) - tree_genParticle_x->at(top[i]))*(tree_genParticle_x->at(sq1[i]) - tree_genParticle_x->at(top[i]))
+            + (tree_genParticle_y->at(sq1[i]) - tree_genParticle_y->at(top[i]))*(tree_genParticle_y->at(sq1[i]) - tree_genParticle_y->at(top[i]))
+            + (tree_genParticle_z->at(sq1[i]) - tree_genParticle_z->at(top[i]))*(tree_genParticle_z->at(sq1[i]) - tree_genParticle_z->at(top[i]));
          dV = TMath::Sqrt( dV );
          hGen_stoq_dV->Fill( dV );
-         dV = (tree_genParticle_vx->at(sq3[i]) - tree_genParticle_vx->at(top[i]))*(tree_genParticle_vx->at(sq3[i]) - tree_genParticle_vx->at(top[i]))
-            + (tree_genParticle_vy->at(sq3[i]) - tree_genParticle_vy->at(top[i]))*(tree_genParticle_vy->at(sq3[i]) - tree_genParticle_vy->at(top[i]))
-            + (tree_genParticle_vz->at(sq3[i]) - tree_genParticle_vz->at(top[i]))*(tree_genParticle_vz->at(sq3[i]) - tree_genParticle_vz->at(top[i]));
+         dV = (tree_genParticle_x->at(sq3[i]) - tree_genParticle_x->at(top[i]))*(tree_genParticle_x->at(sq3[i]) - tree_genParticle_x->at(top[i]))
+            + (tree_genParticle_y->at(sq3[i]) - tree_genParticle_y->at(top[i]))*(tree_genParticle_y->at(sq3[i]) - tree_genParticle_y->at(top[i]))
+            + (tree_genParticle_z->at(sq3[i]) - tree_genParticle_z->at(top[i]))*(tree_genParticle_z->at(sq3[i]) - tree_genParticle_z->at(top[i]));
          dV = TMath::Sqrt( dV );
          hGen_stoq_dV->Fill( dV );
        }
@@ -1067,95 +1057,45 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
    }
 
 // neutralino beta gamma and ctau
+   float ctau1 = -1., ctau2 = -1.;
    if ( neu[0]>=0 && neu[1]>=0 && top[0]>=0 && top[1]>=0 && ntop == 2 && nstoq == 4 ) {
      v = vtop[0] + vsq1[0] + vsq3[0];
      float testE = v.E() / vneu[0].E() - 1.;
-     hGen_neu_testE->Fill( testE );//LOOKAT 0-peak
+     hGen_neu_testE->Fill( testE );
      gamma = vneu[0].E() / Gen_neu1_m;
      bg1 = TMath::Sqrt( gamma*gamma - 1 );
      gamma = vneu[1].E() / Gen_neu2_m;
      bg2 = TMath::Sqrt( gamma*gamma - 1 );
-     hGen_top_bg->Fill( bg1 );//LOOKAT: mean 2.3 (same as neutralino)
-     hGen_top_bg->Fill( bg2 );//LOOKAT: mean 2.3 (same as neutralino)
+     hGen_top_bg->Fill( bg1 );
+     hGen_top_bg->Fill( bg2 );
      if ( abs(testE) < 0.1 ) {  // neu0 gives top0
-       ctau = Gen_top1_d / bg1;
-       hGen_top_ctau->Fill( ctau );// 0 to 100 Cm "decreasing exponential", mean 20 cm
-       ctau = Gen_top2_d / bg2;
-       hGen_top_ctau->Fill( ctau );
+       ctau1 = Gen_top1_d / bg1;
+       hGen_top_ctau->Fill( ctau1 );
+       ctau2 = Gen_top2_d / bg2;
+       hGen_top_ctau->Fill( ctau2 );
      } 
    }
  
 
-// ///////////////////////
-// // Compute GenParticle from LLP at PV
-// 
-//    int gen_fromLLP[5000];
-//    float gen_phi0[5000];
-//    if ( ngenpart >= 5000 ) std::cout << " ##### ERROR ngenpart ##### " << ngenpart << std::endl;
-// 
-//    for (int i=0; i<ngenpart; i++)    // RERE Loop on GenParticle
-//    {
-//      gen_fromLLP[i]= -1;
-//      float pdgId = tree_genParticle_pdgId->at(i); 
-//    if ( pdgId != 11 && pdgId != 13 && pdgId != 211 && pdgId != 321 && pdgId != 2212 ) continue;   
-//      float Gen_vx  = tree_genParticle_vx->at(i);
-//      float Gen_vy  = tree_genParticle_vy->at(i);
-//      float Gen_vz  = tree_genParticle_vz->at(i);
-//      float dv1= 1000000.;
-//      float dv2= 1000000.;
-//      if ( Gen_top1_r >= 0. ) 
-//      dv1 = (Gen_vx - Gen_top1_x)*(Gen_vx - Gen_top1_x)
-//      	 + (Gen_vy - Gen_top1_y)*(Gen_vy - Gen_top1_y)
-//      	 + (Gen_vz - Gen_top1_z)*(Gen_vz - Gen_top1_z);
-//      if ( Gen_top2_r >= 0. ) 
-//      dv2 = (Gen_vx - Gen_top2_x)*(Gen_vx - Gen_top2_x)
-//      	 + (Gen_vy - Gen_top2_y)*(Gen_vy - Gen_top2_y)
-//      	 + (Gen_vz - Gen_top2_z)*(Gen_vz - Gen_top2_z);
-//      float dv = TMath::Sqrt(dv1);
-//      if ( dv2 < dv1 ) dv = TMath::Sqrt(dv2);
-//      hGenTk_dv->Fill( dv );
-//      hGenTk_dv_big->Fill( dv );
-//    if ( dv > 0.1 ) continue;
-// 
-//      if (dv1 <= dv2 ) gen_fromLLP[i]= 1;
-//      else             gen_fromLLP[i]= 2;
-//      float Gen_pt  = tree_genParticle_pt->at(i);
-//      float Gen_eta = tree_genParticle_eta->at(i);
-//      float Gen_phi = tree_genParticle_phi->at(i);
-//      float Gen_q   = tree_genParticle_charge->at(i);
-//      float qR = Gen_q * Gen_pt * 100 / 0.3 / 3.8;
-//      float sin0 = qR * sin( Gen_phi ) + Gen_vx;
-//      float cos0 = qR * cos( Gen_phi ) - Gen_vy;
-//      float phi0 = TMath::ATan2( sin0, cos0 ); // but note that it can be wrong by +_pi !
-//      hGenTk_phi0->Fill( phi0 );
-//      gen_phi0[i] = phi0;
-//    }
-
-
 ///////////////////////
 // MET
 
-  //  int nMET = tree_PFMet_et->size();
-  //  float MET = -10., METphi = -10.;
-  //  if ( nMET > 0 ) {
-  //    MET = tree_PFMet_et->at(0);
-  //    METphi = tree_PFMet_phi->at(0);
-  //  }
-  //  hData_MET->Fill( MET );
-  //  hData_MET_phi->Fill( METphi );
-
+   float MET = tree_PFMet_et;
+   float METphi = tree_PFMet_phi;
+   hData_MET->Fill( MET );
+   hData_MET_phi->Fill( METphi );
 
 ///////////////////////
-// Jets for axis reco
-   int njet_forLLP = 0,ijet1 = -1;
+// Jet
+
    int njet = 0, njet1 = 0, njet2 = 0;
    bool isjet[99], isjet1[99], isjet2[99];
-   TLorentzVector vaxis1, vaxis2, vjet[99];
-   float PtMin = 20; //GeV 
-   float EtaMax = 2.4;
+   TLorentzVector vaxis1, vaxis2, vjet[99], vseed_jet;
 
- // int njetall = ak4slimmedJets->size();
-   int ntrack =  tree_track_pt->size();
+   int ntrkseed = 0, ntrkseed_sel = 0, ntrkseed_bdt = 0, trkseed_q = 0;
+   float trkseed_pt = 0., jetseed_pt = -1.;
+
+   int ntrack =  tree_nTracks;
    hData_nTk->Fill(ntrack);
    
 // genJet AK4
@@ -1164,68 +1104,75 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
 // Jets PF AK4
    for (int i=0; i<njetall; i++)    // Loop on jet
    {
-     float jet_pt  = tree_AK4Slimmedjet_pt->at(i);
-     float jet_eta = tree_AK4Slimmedjet_eta->at(i);
-     float jet_phi = tree_AK4Slimmedjet_phi->at(i);
-//$$
-     isjet[i]  = false;
- //$$    
-     isjet1[i] = false; //first neutralino jets
-     isjet2[i] = false; //second neutralino jets
-     v.SetPtEtaPhiM( jet_pt, jet_eta, jet_phi, 0. ); //set the axis
+     float jet_pt  = tree_jet_pt->at(i);
+     float jet_eta = tree_jet_eta->at(i);
+     float jet_phi = tree_jet_phi->at(i);
+     isjet[i] = false;
+     v.SetPtEtaPhiM( jet_pt, jet_eta, jet_phi, 0. );
 
    if ( jet_pt < PtMin ) continue;
    if ( abs(jet_eta) > EtaMax ) continue;
 
-   if ( i>=0 && i<njetall-1 ) hData_Jet_pt_test->Fill( jet_pt - tree_AK4Slimmedjet_pt->at(i+1) );//check if the first jet has the highest pt
+     if ( i>=0 && i<njetall-1 ) hData_Jet_pt_test->Fill( jet_pt - tree_jet_pt->at(i+1) );
       
 // look if prompt muon inside
      float deltaR1 = 1000., deltaR2 = 1000.;
-     if ( imu1 >= 0 ) deltaR1 = DeltaR( jet_eta, jet_phi, tree_slimmedmuon_eta->at(imu1), tree_slimmedmuon_phi->at(imu1) );
+     if ( imu1 >= 0 ) deltaR1 = DeltaR( jet_eta, jet_phi, tree_muon_eta->at(imu1), tree_muon_phi->at(imu1) );
      hData_Jet_dRmu->Fill( deltaR1 );
-     if ( imu2 >= 0 ) deltaR2 = DeltaR( jet_eta, jet_phi, tree_slimmedmuon_eta->at(imu2), tree_slimmedmuon_phi->at(imu2) );
+     if ( imu2 >= 0 ) deltaR2 = DeltaR( jet_eta, jet_phi, tree_muon_eta->at(imu2), tree_muon_phi->at(imu2) );
      hData_Jet_dRmu->Fill( deltaR2 );
      if ( deltaR1 < 0.4 || deltaR2 < 0.4 ) {
-       if ( deltaR1 < 0.4 ) { //if muon is inside, we remove the muons infomation from the jet
-         v1.SetPtEtaPhiM( tree_slimmedmuon_pt->at(imu1), 
-	                  tree_slimmedmuon_eta->at(imu1), 
-			  tree_slimmedmuon_phi->at(imu1), 0 );
-	 v -= v1; //v TLorentzFactor being just above, defined by jet data
+       if ( deltaR1 < 0.4 ) {
+         v1.SetPtEtaPhiM( tree_muon_pt->at(imu1), 
+	                  tree_muon_eta->at(imu1), 
+			  tree_muon_phi->at(imu1), 0 );
+	 v -= v1;
        }
        if ( deltaR2 < 0.4 ) {
-         v2.SetPtEtaPhiM( tree_slimmedmuon_pt->at(imu2), 
-	                  tree_slimmedmuon_eta->at(imu2), 
-			  tree_slimmedmuon_phi->at(imu2), 0 );
+         v2.SetPtEtaPhiM( tree_muon_pt->at(imu2), 
+	                  tree_muon_eta->at(imu2), 
+			  tree_muon_phi->at(imu2), 0 );
 	 v -= v2;
        }
-       jet_pt  = v.Pt(); //Update jet data by removing the muons information (muons that could be in the jet)
-       jet_eta = v.Eta(); //+ we do not want muons data to build the two axis since they come from the PV
+       jet_pt  = v.Pt(); 
+       jet_eta = v.Eta(); 
        jet_phi = v.Phi(); 
      }  
+     hData_Jet_pt->Fill( jet_pt );
+     hData_Jet_eta->Fill( jet_eta );
+     hData_Jet_phi->Fill( jet_phi );
 
-     hData_Jet_pt->Fill( jet_pt );//FInal jet data without muons
-     hData_Jet_eta->Fill( jet_eta );//FInal jet datawithout muons
-     hData_Jet_phi->Fill( jet_phi );//FInal jet datawithout muons
-     
      njet++;
-//$$
-     njet_forLLP++;//same as njet
-    //  isjet1[i] = true;
-      isjet[i] = true;
-      vjet[i] = v; //Only jet data (with  possible muons being removed)
+     isjet[i] = true;
+     vjet[i] = v;
+     if ( njet1 == 0 && jet_pt > PtMin && abs(jet_eta) < EtaMax ) {
+       njet1 = 1;
+       isjet1[i] = true;
+       vaxis1 = v;
+       vseed_jet = v;
+       hData_Jetseed_pt->Fill( jet_pt );
+       hData_Jetseed_eta->Fill( jet_eta );
+       jetseed_pt = jet_pt;
+       for (int k=0; k<ntrack; k++) {   // Loop on Tracks in jet seed
+         float pt  = tree_track_pt->at(k);
+       if ( pt < 1. ) continue;
+         deltaR = DeltaR( jet_eta, jet_phi, tree_track_eta->at(k), tree_track_phi->at(k) );
+       if ( deltaR > 0.4 ) continue;
+         ntrkseed++;
+	 trkseed_pt += pt;
+	 trkseed_q  += tree_track_charge->at(k);
+	 if ( tree_track_Hemi->at(k)  > 0 ) ntrkseed_sel++;
+	 if ( tree_track_MVAval->at(k)  > -0.0401 ) ntrkseed_bdt++;
+       }	   // end Loop on Track in jet
+     }
 
-        //$$
-
-    //  if ( njet_forLLP == 1 ) {
-    //    vaxis1 = v;//////////////////////////
-    //    ijet1 = i;//////////////////////////
-    //    njet1 = 1;//////////////////////////
-    //    isjet2[i] = true;//LOOKAT
-    //  }
-
-
-    //  if ( njet == 1 ) hData_Jet_pt1->Fill( jet_pt );
-    //  if ( njet == 2 ) hData_Jet_pt2->Fill( jet_pt );
+     if ( njet == 1 ) {
+       hData_Jet1_METpt->Fill( jet_pt / MET );
+       deltaPhi = DeltaPhi( jet_phi, METphi );
+       hData_Jet1_METdphi->Fill( abs(deltaPhi) );
+     }
+     if ( njet == 1 ) hData_Jet_pt1->Fill( jet_pt );
+     if ( njet == 2 ) hData_Jet_pt2->Fill( jet_pt );
 
      bool isMatched = false;
      for (int j=0; j<ngenjet; j++)    // Loop on genJet
@@ -1240,261 +1187,344 @@ std::cout<<"HTjet : "<<HTjet<<" & TagCut : "<<TagCut<<std::endl;
          hDataGen_Jet_dpt->Fill( jet_pt/genjet_pt - 1. );
 	 isMatched = true;
        }
-     }	   // end Loop on genJet recomatched
-     if ( isMatched ) {//gen is recomatched
+     }	   // end Loop on genJet
+     if ( isMatched ) {
        hDataGen_Jet_pt->Fill( jet_pt );
        hDataGen_Jet_eta->Fill( jet_eta );
      }
-     	if ( njet1 == 0 && jet_pt > PtMin && abs(jet_eta) < EtaMax ) 
-        {
-            njet1 = 1;
-            isjet1[i] = true;
-            vaxis1 = v;
-        }
    }	   // end Loop on jet
 
-  // ht filter and Zmu filter
-   hData_Jet_njet->Fill( njet );//njet being the number of jets to go trough the conditions defined line 1000
-   hData_Jet_njet_forLLP->Fill( njet_forLLP );//both should be the same
+   hData_Jet_njet->Fill( njet );
 
+// look for muon seed
+   int imuseed = -1;
+   float museed_pt = 0., museed_eta, museed_phi;
+   TLorentzVector vseed_mu, vmet;
+   for (int m=0; m<nmu; m++) {	     // Loop on reco muons
+   if ( m == imu1 || m == imu2 ) continue;
+   if ( !(tree_muon_isGlobal->at(m)) ) continue;
+     float mu_pt  = tree_muon_pt->at(m);
+     float mu_eta = tree_muon_eta->at(m);
+     float mu_phi = tree_muon_phi->at(m);
+//      bool isIsoMu = true;
+//      for (int i=1; i<njetall; i++) {   // Loop on jet
+//        float jet_eta = tree_jet_eta->at(i);
+//        float jet_phi = tree_jet_phi->at(i);
+//        deltaR = DeltaR( mu_eta, mu_phi, jet_eta, jet_phi );
+//        hData_mujet_dR->Fill( deltaR );
+//        if ( deltaR < 0.4 ) {
+//          isIsoMu = false;
+// 	 break;
+//        }
+//      }	   // end Loop on jet
+//      if ( isIsoMu ) {
+       if ( mu_pt > museed_pt && mu_pt > 20. ) {
+         museed_phi = mu_phi;
+         float dphiMET = abs(DeltaPhi( museed_phi, METphi ));
+         hData_museed_dphiMET->Fill( dphiMET );
+	 if ( dphiMET < dRcut ) {
+           museed_pt = mu_pt;
+           museed_eta = mu_eta;
+	   imuseed = m;
+	 }
+       }
+//      }
+   }	 // end Loop on reco muons
+   if ( imuseed >= 0 ) {
+     hData_museed_pt->Fill( museed_pt );
+     hData_museed_eta->Fill( museed_eta );
+     vseed_mu.SetPtEtaPhiM( museed_pt, museed_eta, museed_phi, 0. );
+// add MET
+     hData_museed_MET->Fill( MET );
+//      if ( MET > 50. ) {
+//        vmet.SetPtEtaPhiM( MET, 0., METphi, 0. );
+//        vseed_mu += vmet; 
+//      }     
+   }
 
-  //////////////////
-  //------------------------------
-  //Event Axis
-  //------------------------------
-  //////////////////
+// look for electron seed
+   int ielseed = -1;
+   float elseed_pt = 0., elseed_eta, elseed_phi;
+   TLorentzVector vseed_el;
+   int nel =  tree_electron_pt->size();
+   for (int k=0; k<nel; k++) {	     // Loop on reco electrons
+     float el_pt  = tree_electron_pt->at(k);
+     float el_eta = tree_electron_eta->at(k);
+     float el_phi = tree_electron_phi->at(k);
+     if ( el_pt > elseed_pt && el_pt > 20. ) {
+       elseed_phi = el_phi;
+       float dphiMET = abs(DeltaPhi( elseed_phi, METphi ));
+       hData_elseed_dphiMET->Fill( dphiMET );
+       if ( dphiMET < dRcut ) {
+     	 elseed_pt = el_pt;
+     	 elseed_eta = el_eta;
+         ielseed = k;
+       }
+     }
+   }	 // end Loop on reco electrons
+   if ( ielseed >= 0 ) {
+     hData_elseed_pt->Fill( elseed_pt );
+     hData_elseed_eta->Fill( elseed_eta );
+     vseed_el.SetPtEtaPhiM( elseed_pt, elseed_eta, elseed_phi, 0. );
+     hData_elseed_MET->Fill( MET );
+   }
 
-  //$$
-  int iLLPrec1 = 1, iLLPrec2 = 2;
-  float dR, dR1 = 10., dR2 = 10., deta, dphi;
+     
+///////////////////////
+// Event axes
 
-  float dRcut_hemis = (TMath::Pi())/2; // optimal choice: pi/2 
-  float dRcut_tracks = (TMath::Pi())/2; //1 or (TMath::Pi())/2 or 2.2
-  float dRcut_muon = 0.4; //subjective value
-  //  if ( ijet1 >= 0 && ijet1 < njetall ) {
-  for (int i=0; i<njetall; i++) // Loop on jet
-    { 
-     if ( !isjet[i] ) continue;//verifies the pt and eta cuts on jets
-       // float jet_pt  = vjet[i].Pt();
-       float jet_eta = vjet[i].Eta();
-       float jet_phi = vjet[i].Phi();
-       if ( njet1 > 0 ) dR1 = DeltaR( jet_eta, jet_phi, vaxis1.Eta(), vaxis1.Phi() );
-       if ( njet2 > 0 ) dR2 = DeltaR( jet_eta, jet_phi, vaxis2.Eta(), vaxis2.Phi() );
+   int iLLPrec1 = 1, iLLPrec2 = 2;
+   float dR, dR1 = 10., dR2 = 10., deta, dphi;
+   TLorentzVector vel, vmu;
+
+//    if ( imuseed >= 0 ) vaxis1 = vseed_mu;
+
+// first pass
+   for (int i=0; i<njetall; i++) {   // Loop on jet
+     isjet1[i] = false;
+     isjet2[i] = false;
+   if ( !isjet[i] ) continue;
+     float jet_eta = vjet[i].Eta();
+     float jet_phi = vjet[i].Phi();
+//      if ( njet1 == 0 && imuseed >= 0 ) dR1 = DeltaR( jet_eta, jet_phi, vaxis1.Eta(), vaxis1.Phi() );
+     if ( njet1 > 0 ) dR1 = DeltaR( jet_eta, jet_phi, vaxis1.Eta(), vaxis1.Phi() );
+     if ( njet2 > 0 ) dR2 = DeltaR( jet_eta, jet_phi, vaxis2.Eta(), vaxis2.Phi() );
 // axis 1
-          if ( njet1 > 0 && !isjet2[i] && dR1 < dRcut_hemis ) {          //
-          njet1++;
-          vaxis1 += vjet[i];
-          isjet1[i] = true;
-        }      
+//      if ( njet1 == 0 && imuseed < 0 ) {
+//        njet1 = 1;
+//        vaxis1 = vjet[i];
+//        isjet1[i] = true;
+//        vseed_jet = vjet[i];
+//      }
+//      else if ( njet1 == 0 && !isjet2[i] && dR1 < dRcut  ) {
+//        njet1 = 1;
+//        vaxis1 += vjet[i];
+//        isjet1[i] = true;
+//      }
+     if ( njet1 > 0 && !isjet2[i] && dR1 < dRcut ) {
+       njet1++;
+       vaxis1 += vjet[i];
+       isjet1[i] = true;
+     }
 // axis 2
-        if (   njet2 == 0 && !isjet1[i] ) {
-          njet2 = 1;
-          vaxis2 = vjet[i];
-          isjet2[i] = true;
-        }
-        else if ( njet2 > 0 && !isjet1[i] && !isjet2[i] && dR2 < dRcut_hemis ) {//
-          njet2++;
-          vaxis2 += vjet[i];
-          isjet2[i] = true;
-        }
-        //std::cout<<"njet1 "<< njet1 <<"njet2 "<< njet2 <<"isjet1[i] "<< isjet1[i] <<"isjet2[i] "<<isjet2[i] <<std::endl;
-     }	   // end Loop on jet
-   hData_Jet1->Fill( njet1 );
-   hData_Jet2->Fill( njet2 );
-   //std::cout<<"vaxis2.pt "<< vaxis2.Pt() <<"vaxis2.eta "<<vaxis2.Eta()  <<"vaxis2.phi "<< vaxis2.Phi()<<std::endl;
-   
-  /////////////////////////////// 
-  // compare with neutralino axis
-  /////////////////////////////// 
+     if ( njet2 == 0 && !isjet1[i] ) {
+       njet2 = 1;
+       vaxis2 = vjet[i];
+       isjet2[i] = true;
+     }
+     else if ( njet2 > 0 && !isjet1[i] && !isjet2[i] && dR2 < dRcut ) {
+       njet2++;
+       vaxis2 += vjet[i];
+       isjet2[i] = true;
+     }
+   }	 // end Loop on jet
 
-//$$
+// // second pass
+//    for (int i=0; i<njetall; i++) {   // Loop on jet
+//    if ( !isjet[i] ) continue;
+//      float jet_eta = vjet[i].Eta();
+//      float jet_phi = vjet[i].Phi();
+//      if ( njet1 > 0 ) dR1 = DeltaR( jet_eta, jet_phi, vaxis1.Eta(), vaxis1.Phi() );
+//      if ( njet2 > 0 ) dR2 = DeltaR( jet_eta, jet_phi, vaxis2.Eta(), vaxis2.Phi() );
+// // axis 1
+//      if ( njet1 >= 2 && isjet1[i] && dR1 > dRcut ) {
+//        njet1--;
+//        vaxis1 -= vjet[i];
+//        isjet1[i] = false;
+//        if ( !isjet2[i] && dR2 < dRcut ) {
+//          njet2++;
+//          vaxis2 += vjet[i];
+//          isjet2[i] = true;
+//        }
+//      }
+// // axis 2
+//      else if ( njet2 >= 1 && isjet2[i] && dR2 > dRcut  ) {
+//        njet2--;
+//        vaxis2 -= vjet[i];
+//        isjet2[i] = false;
+//        if ( !isjet1[i] && dR1 < dRcut ) {
+//          njet1++;
+//          vaxis1 += vjet[i];
+//          isjet1[i] = true;
+//        }
+//      }
+//    }	 // end Loop on jet
+// 
+// // third pass
+//    for (int i=0; i<njetall; i++) {   // Loop on jet
+//    if ( !isjet[i] ) continue;
+//    if ( njet1 <= 1 || njet2 == 0 ) continue;
+//    if ( !isjet1[i] || !isjet2[i] ) continue;
+//      float jet_eta = vjet[i].Eta();
+//      float jet_phi = vjet[i].Phi();
+//      dR1 = DeltaR( jet_eta, jet_phi, vaxis1.Eta(), vaxis1.Phi() );
+//      dR2 = DeltaR( jet_eta, jet_phi, vaxis2.Eta(), vaxis2.Phi() );
+// // axis 1
+//      if ( isjet1[i] && !isjet2[i] && dR1 > dR2 && dR2 < dRcut ) {
+//        njet1--;
+//        vaxis1 -= vjet[i];
+//        isjet1[i] = false;
+//        njet2++;
+//        vaxis2 += vjet[i];
+//        isjet2[i] = true;
+//      }
+// // axis 2
+//      else if ( isjet2[i] && !isjet1[i] && dR2 > dR1 && dR1 < dRcut ) {
+//        njet2--;
+//        vaxis2 -= vjet[i];
+//        isjet2[i] = false;
+//        njet1++;
+//        vaxis1 += vjet[i];
+//        isjet1[i] = true;
+//      }
+//    }	 // end Loop on jet
+
+   hData_Jet_njet_forLLP->Fill( njet1+njet2 );
+   hData_Jet_njet1->Fill( njet1 );
+   hData_Jet_njet2->Fill( njet2 );
+
+// compare with neutralino axis
    float axis1_eta = vaxis1.Eta();
    float axis1_phi = vaxis1.Phi();
-     if ( neu[0] >= 0 ) dR1 = DeltaR( axis1_eta, axis1_phi, Gen_neu1_eta, Gen_neu1_phi );//dR between reco axis of jets and gen neutralino
-     if ( neu[1] >= 0 ) dR2 = DeltaR( axis1_eta, axis1_phi, Gen_neu2_eta, Gen_neu2_phi );
-     dR = dR1;
-     if ( dR2 < dR1 ) 
-     { //make sure that the reco axis defined meshes well with the axis of the gen neutralino, if not it is swapped
-       iLLPrec1 = 2;
-       iLLPrec2 = 1;
-       dR = dR2;
-     }
-    float axis1_dR = dR;
-    float axis2_eta = vaxis2.Eta();
-    float axis2_phi = vaxis2.Phi();
-    if ( njet2 == 0 ) 
-    {  // compute an axis 2 even without jet, by taking the opposite in phi to axis 1
-      axis2_eta = axis1_eta;
-      axis2_phi = axis1_phi - 3.14159;
-      if ( axis1_phi < 0 ) axis2_phi = axis1_phi + 3.14159;
-      // vaxis2.SetPtEtaPhiM( vaxis1.Pt(), axis2_eta, axis2_phi, 0 );
-    }
-  if ( iLLPrec2 == 1 ) dR = DeltaR( axis2_eta, axis2_phi, Gen_neu1_eta, Gen_neu1_phi );
-  else                 dR = DeltaR( axis2_eta, axis2_phi, Gen_neu2_eta, Gen_neu2_phi ); 
-
-
-     if ( iLLPrec1 == 1 ) {
-       dphi = abs(DeltaPhi( axis1_phi, Gen_neu1_phi ));
-       deta = abs(axis1_eta - Gen_neu1_eta);
-     }
-     else {
-       dphi = abs(DeltaPhi( axis1_phi, Gen_neu2_phi ));
-       deta = abs(axis1_eta - Gen_neu2_eta);
-     }
-     hDataGen_LLPrec1_dR->Fill( dR );//si on ajoute met, on dégrade <2
-     hDataGen_LLPrec1_deta->Fill( deta );//comparison between reco and gen <0.5
-     hDataGen_LLPrec1_dphi->Fill( dphi );  // <1.5, association works well
-  //  }
-
-
-  ////////////////////////////////////////////////////////////
-  ////////////////////////does not work atm//////////////////////////
-  ////////////////////////////////////////////////////////////
-   if ( dRneuneu > dRcut_hemis && ijet1 >= 0 && ijet1 < njetall ) {
-     float axis2_phi = 0.;
-     //Hypothesis: both neutralinos are back to back
-     if ( axis1_phi >= 0 ) axis2_phi = axis1_phi - 3.14159;//phi has to be between (-pi/+pi)
-     else                 axis2_phi = axis1_phi + 3.14159;//phi has to be between (-pi/+pi)
-     //Thisis a first assessment on the axis of the other neutralino wrt the first one
-     float axis1sym_phi = axis2_phi;
-     
-     if ( iLLPrec2 == 1 ) {
-       dR = DeltaR( axis1_eta, axis2_phi, Gen_neu1_eta, Gen_neu1_phi );//reco vs gen
-       dphi = abs(DeltaPhi( axis2_phi, Gen_neu1_phi ));//check if the neutralino is within the axis previously defined, we would like dR<0.4
-       //with the assumption that both neutralinos are back to back
-     }
-     else {
-       dR = DeltaR( axis1_eta, axis2_phi, Gen_neu2_eta, Gen_neu2_phi );//reco vs gen
-       dphi = abs(DeltaPhi( axis2_phi, Gen_neu2_phi ));//check if the neutralino is within the axis previously defined, we would like dR<0.4
-       //with the assumption that both neutralinos are back to back
-     }
-     hDataGen_LLPrec2_sym_dR->Fill( dR );//LOOKAT: these two distributions shouldn't be that great as the assumptions is made that both (true)
-     hDataGen_LLPrec2_sym_dphi->Fill( dphi );//LOOKAT: neutralions are back to back
-    //############################"END OF Hypothesis: both neutralinos are back to back##################################
-
-	
-
-
-     
-     if ( njet2 >= 1 ) {
-       float axis2_eta = vaxis2.Eta();
-       float axis2_phi = vaxis2.Phi();
-       float dRsym, dphisym;
-       if ( iLLPrec2 == 1) {
-         dR = DeltaR( axis2_eta, axis2_phi, Gen_neu1_eta, Gen_neu1_phi );
-         dphi = abs(DeltaPhi( axis2_phi, Gen_neu1_phi ));
-         deta = abs(axis2_eta - Gen_neu1_eta);
-         dRsym = DeltaR( axis2_eta, axis1sym_phi, Gen_neu1_eta, Gen_neu1_phi );
-         dphisym = abs(DeltaPhi( axis1sym_phi, Gen_neu1_phi ));
-       }
-       else {
-         dR = DeltaR( axis2_eta, axis2_phi, Gen_neu2_eta, Gen_neu2_phi );
-         dphi = abs(DeltaPhi( axis2_phi, Gen_neu2_phi ));
-         deta = abs(axis2_eta - Gen_neu2_eta);
-         dRsym = DeltaR( axis2_eta, axis1sym_phi, Gen_neu2_eta, Gen_neu2_phi );
-         dphisym = abs(DeltaPhi( axis1sym_phi, Gen_neu2_phi ));
-       }
-       //look at the dR between the two reconstructed axis
-       float dRaxis1_2 = DeltaR( axis1_eta, axis1_phi, axis2_eta, axis2_phi);
-       std::cout<<"dR between the two axis is computed"<<std::endl;
-       hData_Jetaxis_dR->Fill(dRaxis1_2);// pi-peak
-
-       hDataGen_LLPrec2_dR->Fill( dR );//this should be a better axis2 reco //LOOKAT (true)
-       hDataGen_LLPrec2_deta->Fill( deta );//LOOKAT (true)
-       hDataGen_LLPrec2_dphi->Fill( dphi );//LOOKAT
-       hDataGen_LLPrec2_dRsym->Fill( dRsym );//LOOKAT
-       hDataGen_LLPrec2_dphisym->Fill( dphisym );//LOOKAT : same as hDataGen_LLPrec2_sym_dphi
-     }
+   if ( neu[0] >= 0 ) dR1 = DeltaR( axis1_eta, axis1_phi, Gen_neu1_eta, Gen_neu1_phi );
+   if ( neu[1] >= 0 ) dR2 = DeltaR( axis1_eta, axis1_phi, Gen_neu2_eta, Gen_neu2_phi );
+   dR = dR1;
+   if ( dR2 < dR1 ) {
+     iLLPrec1 = 2;
+     iLLPrec2 = 1;
+     dR = dR2;
    }
-//regarder comment se comporte les traces par rapport aux acxes consutris précédemment
-//axe dR trace et axis avec dr plsu petit(done below)
-//dR entre les deux vaxis1(done above)
-//caractéristique de straces par raport à l'association aux neutralions
-//code sans bdt, réudction du bdf?? signal?? perte de traces (later)
-      //CHeck if the muon is inside of one of the cone defined by the axis
-          //  std::cout<<"nmu per event : "<<nmu<<std::endl;
-        for (int j=0; j<nmu; j++) //loop on reco muons
-          {	   
-            if ( !tree_slimmedmuon_isGlobalMuon->at(j) ) continue;//Need global muons
-            int IsInside=0;
-            // float mupt = tree_slimmedmuon_pt->at(i);
-	          float mueta = tree_slimmedmuon_eta->at(j);
-			      float muphi = tree_slimmedmuon_phi->at(j);
-            float eta1 = vaxis1.Eta();
-            float phi1 = vaxis1.Phi();
-            float eta2 = vaxis2.Eta();
-            float phi2 = vaxis2.Phi();
-            float dR_Mu_Axis1 = DeltaR( mueta, muphi, eta1, phi1);
-            float dR_Mu_Axis2 = DeltaR( mueta, muphi, eta2, phi2);
-            hData_Mu_Axis_dR->Fill(dR_Mu_Axis1);
-            hData_Mu_Axis_dR->Fill(dR_Mu_Axis2);
-            // std::cout<<"dR_Mu_Axis1: "<<dR_Mu_Axis1<<" & dR_Mu_Axis2: "<<dR_Mu_Axis2<<std::endl;
-            if (dR_Mu_Axis1 < dRcut_muon || dR_Mu_Axis2  < dRcut_muon)//the 0.4 limit is arbitrary
-              {
-                IsInside=1;
-              }
-              hData_Muon_Axis_dR4->Fill(IsInside);//LOOKAT: A non-negligeable amount of muons are in the cone defined by the axis of the two hemispheres
-          }
-//////////////////////////////////////////////////
-//HSCP conditions on the tracks (plots for Dylan)
-//plot FakeRate as a function of pt (upto 2 TeV)
-//////////////////////////////////////////////////
+   if ( iLLPrec1 == 1 ) {
+     dphi = abs(DeltaPhi( axis1_phi, Gen_neu1_phi ));
+     deta = abs(axis1_eta - Gen_neu1_eta);
+   }
+   else {
+     dphi = abs(DeltaPhi( axis1_phi, Gen_neu2_phi ));
+     deta = abs(axis1_eta - Gen_neu2_eta);
+   }
+   float axis1_dR = dR;
+   float axis1_deta = deta;
+   float axis1_dphi = dphi;
+   
+   float axis2_eta = vaxis2.Eta();
+   float axis2_phi = vaxis2.Phi();
+   if ( njet2 == 0 ) {         // compute an axis 2 even without jet, by taking the opposite in phi to axis 1
+     axis2_eta = axis1_eta;
+     axis2_phi = axis1_phi - 3.14159;
+     if ( axis1_phi < 0 ) axis2_phi = axis1_phi + 3.14159;
+     vaxis2.SetPtEtaPhiM( vaxis1.Pt(), axis2_eta, axis2_phi, 0 );
+   }
+   if ( iLLPrec2 == 1 ) {
+     dR = DeltaR( axis2_eta, axis2_phi, Gen_neu1_eta, Gen_neu1_phi );
+     dphi = abs(DeltaPhi( axis2_phi, Gen_neu1_phi ));
+     deta = abs(axis2_eta - Gen_neu1_eta);
+   }
+   else {
+     dR = DeltaR( axis2_eta, axis2_phi, Gen_neu2_eta, Gen_neu2_phi );
+     dphi = abs(DeltaPhi( axis2_phi, Gen_neu2_phi ));
+     deta = abs(axis2_eta - Gen_neu2_eta);
+   }
+   if ( njet2 == 0 ) {
+     hDataGen_LLP2_sym_dR->Fill( dR );
+     hDataGen_LLP2_sym_dphi->Fill( dphi );
+   }
+   float axis2_dR = dR;
+   float axis2_deta = deta;
+   float axis2_dphi = dphi;
 
-for (int i=0; i<ntrack; i++)
-  {
-    // maxSize=maxSize+tree_track_isSimMatched->size();
-     float q   = tree_track_charge->at(i);
-     float pt  = tree_track_pt->at(i);
-     float eta = tree_track_eta->at(i);
-     float phi = tree_track_phi->at(i);
-     float dr = abs(tree_track_dxy->at(i));
-     float drSig = -1., dzSig = -1., ddSig = -1.;
-     if ( tree_track_dxyError->at(i) > 0 ) drSig = dr / tree_track_dxyError->at(i);
-     float dz = abs(tree_track_dz->at(i));
-     if ( tree_track_dzError->at(i) > 0 )  dzSig = dz / tree_track_dzError->at(i);
-     float dd = TMath::Sqrt( dr*dr + dz*dz );
-     if ( drSig>0 && dzSig>0 ) ddSig = TMath::Sqrt( drSig*drSig + dzSig*dzSig );
-     float pix = tree_track_numberOfValidPixelHits->at(i);
-     float hit = tree_track_nhits->at(i);
-     float chi = tree_track_NChi2->at(i);
-     bool HighQuality=tree_track_isHighQuality->at(i);
-     float algo = tree_track_algo->at(i);
-    //  int lost_hits = tree_track_numberOfLostHits->at(i);
-     int  valid_hits= tree_track_numberOfValidHits->at(i);
-     float FracValidHits = valid_hits/hit;
-     if ((tree_track_isSimMatched->at(i)==true || tree_track_isSimMatched->at(i)==false) &&  abs(eta)<2.1 && chi <= 5 && dz<=0.5 && dr<=0.02  && pix>=2 && hit>=8 && HighQuality==true && FracValidHits>0.8 ) {h1->Fill(pt);}
-     //  std::cout<<"nhit="<<hit<<" just to check if hit is !=0"<<std::endl;//if != 0, remove the conditions below (ok)
-     
-     if (tree_track_isSimMatched->at(i)==true  && abs(eta)<2.1 && chi <= 5 && dz<=0.5 && dr<=0.02  && pix>=2 && hit>=8 && HighQuality==true && FracValidHits>0.8 )
-       {
-          hData_FakeRate_vs_pt->Fill(pt);//à normaliser par le nombre de track
-          h_DataHSCP->Fill(pt);
-       }
-        
-  }
-      
+// compare seeds with neutralino axis
+   dR1 = DeltaR( vseed_jet.Eta(), vseed_jet.Phi(), Gen_neu1_eta, Gen_neu1_phi );
+   dR2 = DeltaR( vseed_jet.Eta(), vseed_jet.Phi(), Gen_neu2_eta, Gen_neu2_phi );
+   dR = dR1;
+   deta = abs( vseed_jet.Eta()-Gen_neu1_eta );
+   dphi = abs( DeltaPhi(vseed_jet.Phi(), Gen_neu1_phi) );
+   if ( dR2 < dR1 ) {
+     dR = dR2;
+     deta = abs( vseed_jet.Eta()-Gen_neu2_eta );
+     dphi = abs( DeltaPhi(vseed_jet.Phi(), Gen_neu2_phi) );
+   }
+
+   hDataGen_seed_dR->Fill( dR );
+   hDataGen_seed_deta->Fill( deta );
+   hDataGen_seed_dphi->Fill( dphi );
+   if ( dR < dRcut ) {
+     hDataGen_seed_dRLT15_ntrk->Fill( ntrkseed );
+     hDataGen_seed_dRLT15_ntrksel->Fill( ntrkseed_sel );
+     hDataGen_seed_dRLT15_ntrkbdt->Fill( ntrkseed_bdt );
+     hDataGen_seed_dRLT15_trkQ->Fill( trkseed_q );
+     hDataGen_seed_dRLT15_trkPt->Fill( trkseed_pt );
+     hDataGen_seed_dRLT15_trkPtRel->Fill( trkseed_pt/jetseed_pt);
+   }
+   else {
+     hDataGen_seed_dRGT15_ntrk->Fill( ntrkseed );
+     hDataGen_seed_dRGT15_ntrksel->Fill( ntrkseed_sel );
+     hDataGen_seed_dRGT15_ntrkbdt->Fill( ntrkseed_bdt );
+     hDataGen_seed_dRGT15_trkQ->Fill( trkseed_q );
+     hDataGen_seed_dRGT15_trkPt->Fill( trkseed_pt );
+     hDataGen_seed_dRGT15_trkPtRel->Fill( trkseed_pt/jetseed_pt);
+   }
+   
+   if ( axis1_dR > dRcut ) hDataGen_seed_dR1GT15_dR->Fill( dR );
+   if ( dR > dRcut )       hDataGen_LLP1_dRseedGT15_dR->Fill( axis1_dR );
+
+   if ( imuseed >= 0 ) {
+     dR1 = DeltaR( vseed_mu.Eta(), vseed_mu.Phi(), Gen_neu1_eta, Gen_neu1_phi );
+     dR2 = DeltaR( vseed_mu.Eta(), vseed_mu.Phi(), Gen_neu2_eta, Gen_neu2_phi );
+     dR = dR1;
+     if ( dR2 < dR1 ) dR = dR2; 
+     hDataGen_museed_dR->Fill( dR );
+   }
+   if ( ielseed >= 0 ) {
+     dR1 = DeltaR( vseed_el.Eta(), vseed_el.Phi(), Gen_neu1_eta, Gen_neu1_phi );
+     dR2 = DeltaR( vseed_el.Eta(), vseed_el.Phi(), Gen_neu2_eta, Gen_neu2_phi );
+     dR = dR1;
+     if ( dR2 < dR1 ) dR = dR2; 
+     hDataGen_elseed_dR->Fill( dR );
+   }
+
+   hDataGen_LLP_dR->Fill( axis1_dR );
+   hDataGen_LLP_dR->Fill( axis2_dR );
+   hDataGen_LLP1_dR->Fill( axis1_dR );
+   hDataGen_LLP1_deta->Fill( axis1_deta );
+   hDataGen_LLP1_dphi->Fill( axis1_dphi );
+   hDataGen_LLP2_dR->Fill( axis2_dR );
+   hDataGen_LLP2_deta->Fill( axis2_deta );
+   hDataGen_LLP2_dphi->Fill( axis2_dphi );
+
+   if ( axis2_dR > dRcut ) hDataGen_LLP1_dR2GT15_dR->Fill( axis1_dR );
+   if ( axis1_dR > dRcut ) hDataGen_LLP2_dR1GT15_dR->Fill( axis2_dR );
+
+   dR = DeltaR( axis1_eta, axis1_phi, axis2_eta, axis2_phi );
+   dphi = abs(DeltaPhi( axis1_phi, axis2_phi ));
+   deta = abs(axis1_eta - axis2_eta);
+   hData_axis12_dR->Fill( dR );
+   hData_axis12_deta->Fill( deta );
+   hData_axis12_dphi->Fill( dphi );
+
+//    if ( nneu == 2 && dRneuneu > dRcut && axis2_dR > dRcut ) {
+//      std::cout << "event dRneuneu " << allevents << " " << dRneuneu << "   njet1 dR1 "<< njet1 << " " << axis1_dR << "   njet2 dR2 " << njet2 << " " << axis2_dR << std::endl;     
+//    }     
+
+
 ///////////////////////
-// Track or TrackSim + Track data wrt the two axis
-      // int nMatch_0=0;
-      int nMatch_1=0;
-      int nMatch_2=0;
-      // int nMissMatch=0;
+// Tracks
 
    int nTkSim = 0, nTkOth = 0;
-  //  int ntracksim = tree_track_simtrack_pt->size();
-  //  if ( ngenpart > 0 && ntrack != ntracksim ) std::cout << " ##### ERROR ntrack ntracksim ##### " << ntrack << " " << ntracksim << std::endl;
    int track_isfromLLP[1000], track_SEL40[1000];
    bool track_SELEC[1000];
    if ( ntrack >= 1000 ) std::cout << " ##### ERROR ntrack ##### " << ntrack << std::endl;
 
-   for (int i=0; i<ntrack; i++)    // Loop on Track or TrackSim
+   int ntrack_LLP1 = 0, ntrack_LLP2 = 0;
+   int itrack_LLP1[100], itrack_LLP2[100];
+   float track_mva_LLP1[100], track_mva_LLP2[100];
+
+   for (int i=0; i<ntrack; i++)    // Loop on Tracks
    {
-     track_isfromLLP[i] = -1;
-     int iV = -1;
+     track_isfromLLP[i] = tree_track_sim_LLP->at(i);
      int ntrk10 = 0, ntrk20 = 0, ntrk30 = 0, ntrk40 = 0;
      track_SEL40[i] = 0;
      track_SELEC[i] = false;
-
+    tracks ++;
      float q   = tree_track_charge->at(i);
      float pt  = tree_track_pt->at(i);
      float eta = tree_track_eta->at(i);
@@ -1506,346 +1536,32 @@ for (int i=0; i<ntrack; i++)
      if ( tree_track_dzError->at(i) > 0 )  dzSig = dz / tree_track_dzError->at(i);
      float dd = TMath::Sqrt( dr*dr + dz*dz );
      if ( drSig>0 && dzSig>0 ) ddSig = TMath::Sqrt( drSig*drSig + dzSig*dzSig );
-     float pix = tree_track_numberOfValidPixelHits->at(i);
-     float hit = tree_track_nhits->at(i);
+     float pix = tree_track_nHitPixel->at(i);
+     float hit = tree_track_nHit->at(i);
      float chi = tree_track_NChi2->at(i);
-     float x1 = tree_track_firsthit_X->at(i);
-     float y1 = tree_track_firsthit_Y->at(i);
-     float z1 = tree_track_firsthit_Z->at(i);
+     float x1 = tree_track_firstHit_x->at(i);
+     float y1 = tree_track_firstHit_y->at(i);
+     float z1 = tree_track_firstHit_z->at(i);
      float r1 = TMath::Sqrt( x1*x1 + y1*y1 );
-
      int inJet = 0;
-     int jet = tree_track_recoAK4SlimmedJet_idx->at(i);
+     int jet = tree_track_iJet->at(i);
      if ( jet >= 0 ) inJet = 1;
 
-     if ( pt > 1. && chi < 5. && drSig > 5. ) track_SELEC[i] = true;//cut included in the Ntuple code generator
-
-    float dR=0;
-    int Tracks_axis=0;//flag to check which axis is the closest from the track
-    float dR1  = DeltaR( eta, phi, axis1_eta, axis1_phi);//axis1_phi and axis1_eta for the first axis
-    float axis2_eta = -10;
-    float axis2_phi = -10;
-    int isFromLLP = tree_track_simtrack_isFromLLP->at(i);
-    float bdtval=tree_track_MVAval->at(i);
-    //std::cout<<"nbre jet2= "<<njet2<<" has to be >=1"<<std::endl;
-    // if ( njet2 >= 1 ) 
-      // {
-    axis2_eta = vaxis2.Eta();
-    axis2_phi = vaxis2.Phi();
-    //check the dR between the tracks and the second axis (without any selection on the tracks)
-    float dR2  = DeltaR( eta, phi, axis2_eta, axis2_phi);
-
-    if (dR1>dR2)//a restriction could be added on the value of dR to assign the value Tracks_axis  (avoid some background???)
-      //++ you could have a track that belongs to the two hemispheres ...
-        {
-          dR=dR2;
-          if (dR < dRcut_tracks)
-            {
-              Tracks_axis=2;//belongs to second axis (second neutralino)
-            }
-
-        }
-    else
-        {
-          dR=dR1;
-          if (dR < dRcut_tracks)
-            {
-              Tracks_axis=1;//belongs to second axis (second neutralino)
-            }
-        }
-      // }
-      // std::cout<<"dR1= "<<dR1<<";dR2= "<<dR2<<";Track_axis= "<<Tracks_axis<<std::endl;
-    float bdtcut=-0.0401;//optimal value w/o track association to axis: -0.0401
-
-    //Check if the hemisphere association matches the ntuple assosication with neutralinos 1 and 2
-    if(track_SELEC[i] == true)//apply pre-cut to reduce bkg by 90%
-        {
-         hData_Jet_Track_dR->Fill( dR );//LOOKAT : gap between tracks and the axis (both of them)  /^\\ pi/2-peak
-         hData_Tracks_repart->Fill(Tracks_axis);//LOOKAT : repartition of the tracks wrt to each axis //ok 50/50 between the two neutralinos
-          if ( iLLPrec1==1)
-            {
-              if (Tracks_axis==1 && isFromLLP==1 )//belongs to first hemisphere//1-1
-                {
-                  // nMatch_1++;
-                  hData_isMatched_dR_1->Fill(dR);//nMatch_1
-                  nSignalTracks++;
-                  nTrackingPerfSignal++;
-                  hData_Matched_bdtvalue->Fill(bdtval);
-                  if ( bdtval > bdtcut )//signal selection
-                    {
-                      nMatch_1++;
-                      hData_isMVA_Matched_dR_1->Fill(dR);//nMatch_1
-                      n_Mva_SignalTracks++;
-                      hData_NTracks_1->Fill(nMatch_1);
-                    }
-                }
-              else if(Tracks_axis==2 && isFromLLP==2)//belongs to second hemisphere//2-2
-                {
-                  
-                  hData_isMatched_dR_2->Fill(dR);//nMatch_2
-                  nSignalTracks++;
-                  nTrackingPerfSignal++;
-                  hData_Matched_bdtvalue->Fill(bdtval);
-                  if ( bdtval > bdtcut )//signal selection
-                    {
-                      nMatch_2++;
-                      hData_isMVA_Matched_dR_2->Fill(dR);//nMatch_2
-                      hData_NTracks_2->Fill(nMatch_2);
-                      n_Mva_SignalTracks++;
-                    }
-                }
-              else if( isFromLLP==0)//does not belong to a displaced track (not from neutralino)//2-0 or 1-0
-                {//since all tracks are asigned to an hemisphere and considered as signal(Tracks_Axis=1 or 2), some of them could be in reality be not asigned to an 
-                  //hemisphere (Tracks_Axis=0 not included yet) and IsFromLLP:: This would be truly reconstructed background.
-                  //A distinction should be made between 0-0 (true reco bkg) and (2-0)/(1-0) which are misidentified tracks (next "else") but IsFromLLP=0 give 
-                  //them the status of bkg. H/e, all the tracks are well-distinguished atm. Therefore,  precautions sould be taken for this part when changing the 
-                  //association between tracks and axis (Track_axis=0 possibility)
-                  //CARE: For a 100% Signal Efficiency of the BDT (0%Bkg eff), the missmatch after applying the bdt is between real signal tracks 
-                  //(Tracks_axis=0 does not exist hypothetically). Since it is not the case, 0-0 has a probability of happening. This is  where the signal(bkg) efficiency
-                  //of the BDT is important.
-                    // nMatch_0++;
-                    hData_isMatched_dR_0->Fill(dR);////nMatch_0
-                    nBkgTracks++;
-                    nTrackingPerfBkg++;
-                    hData_Matched_bdtvalue->Fill(bdtval);
-                    if ( bdtval > bdtcut )//signal selection
-                      {
-                        hData_isMVA_Matched_dR_0->Fill(dR);//nMatch_0
-                        n_Mva_BkgTracks++;
-                      }
-                }
-              else//miss-association of signal: tracks lost for reco?2-1/1-2/
-                {
-                  // nMissMatch++;
-                  hData_dR_isMissMatched->Fill(dR);//nMissMatch
-                  nBkgTracks++;
-                  nTrackingPerfSignal++;
-                  if ( bdtval > bdtcut )//signal selection
-                    {
-                      hData_isMVA_dR_MissMatched->Fill(dR);//nMissMatch
-                      n_Mva_BkgTracks++;
-                      hData_NotMatched_bdtvalue->Fill(bdtval);//follows signal BDT distribution
-                    } // end if (bdt cut)
-                } //  end else
-            } // end if illPrec1
-
-          if ( iLLPrec1==2)
-            {
-              if (Tracks_axis==2 && isFromLLP==1 )//belongs to first hemisphere//1-1//testre avec illp1 ou 2
-                {
-                  // nMatch_1++;
-                  hData_isMatched_dR_1->Fill(dR);//nMatch_1
-                  nSignalTracks++;
-                  nTrackingPerfSignal++;
-                  hData_Matched_bdtvalue->Fill(bdtval);
-                  if ( bdtval > bdtcut )//signal selection
-                    { nMatch_1++;
-                      hData_NTracks_1->Fill(nMatch_1);
-                      hData_isMVA_Matched_dR_1->Fill(dR);//nMatch_1
-                      n_Mva_SignalTracks++;
-                    }
-                }
-              else if(Tracks_axis==1 && isFromLLP==2)//belongs to second hemisphere//2-2
-                {
-                  // nMatch_2++;
-                  
-                  
-                  hData_isMatched_dR_2->Fill(dR);//nMatch_2
-                  nSignalTracks++;
-                  nTrackingPerfSignal++;
-                  hData_Matched_bdtvalue->Fill(bdtval);
-                  if ( bdtval > bdtcut )//signal selection
-                    {
-                      nMatch_2++;
-                      hData_NTracks_2->Fill(nMatch_2);
-                      hData_isMVA_Matched_dR_2->Fill(dR);//nMatch_2
-                      n_Mva_SignalTracks++;
-                    }
-                }
-              else if( isFromLLP==0)//does not belong to a displaced track (not from neutralino)//2-0 or 1-0
-                {//since all tracks are asigned to an hemisphere and considered as signal(Tracks_Axis=1 or 2), some of them could be in reality be not asigned to an 
-                  //hemisphere (Tracks_Axis=0 not included yet) and IsFromLLP:: This would be truly reconstructed background.
-                  //A distinction should be made between 0-0 (true reco bkg) and (2-0)/(1-0) which are misidentified tracks (next "else") but IsFromLLP=0 give 
-                  //them the status of bkg. H/e, all the tracks are well-distinguished atm. Therefore,  precautions sould be taken for this part when changing the 
-                  //association between tracks and axis (Track_axis=0 possibility)
-                  //CARE: For a 100% Signal Efficiency of the BDT (0%Bkg eff), the missmatch after applying the bdt is between real signal tracks 
-                  //(Tracks_axis=0 does not exist hypothetically). Since it is not the case, 0-0 has a probability of happening. This is  where the signal(bkg) efficiency
-                  //of the BDT is important.
-                  // nMatch_0++;
-                  hData_isMatched_dR_0->Fill(dR);////nMatch_0
-                  nBkgTracks++;
-                  nTrackingPerfBkg++;
-                  hData_Matched_bdtvalue->Fill(bdtval);
-                  if ( bdtval > bdtcut )//signal selection
-                    {
-                      hData_isMVA_Matched_dR_0->Fill(dR);//nMatch_0
-                      n_Mva_BkgTracks++;
-                    }
-                }
-              else//miss-association of signal: tracks lost for reco?1-1/2-2/
-                {
-                  // nMissMatch++;
-                  hData_dR_isMissMatched->Fill(dR);//nMissMatch
-                  nBkgTracks++;
-                  nTrackingPerfSignal++;
-                  if ( bdtval > bdtcut )//signal selection
-                    {
-                      hData_isMVA_dR_MissMatched->Fill(dR);//nMissMatch
-                      n_Mva_BkgTracks++;
-                      hData_NotMatched_bdtvalue->Fill(bdtval);//follows signal BDT distribution
-                    } // end if (bdt cut)
-                } //  end else
-            } // end if illPrec2
-          if(dR1<dRcut_tracks && dR2<dRcut_tracks)//The considreed track could be associated to both hemis.
-            {
-              float dRaxis = DeltaR( axis1_eta, axis1_phi, axis2_eta, axis2_phi);
-              hData_BothHemi_SB_dR->Fill(dRaxis);//dR between the axis in such a case
-	            //hData_SB_isMissMatched->Fill(dR);
-              if ( iLLPrec1==1 || iLLPrec1==2)
-                {
-                  if( isFromLLP!=0 && (isFromLLP != iLLPrec1 || isFromLLP != iLLPrec2) )
-                    {
-                      hData_S_isMissMatched->Fill(dR);
-		                  hData_BothHemi_S_dR->Fill(dRaxis);
-                    }
-                }
-            }
-
-        }// end Track Selec loop  
-
-
-
-// sim tracks associated to reco tracks
-     float ptSim  = -1.;
-//      if ( ntracksim > 0 ) ptSim = tree_track_simtrack_pt->at(i);
-//      if ( ntracksim > 0 && ptSim > 0. && tree_track_isSimMatched->at(i) ) {
-//       //can build fakerate with tree_track_isSimMatched above
-//        float qSim   = tree_track_simtrack_charge->at(i);
-//        float etaSim = tree_track_simtrack_eta->at(i);
-//        float phiSim = tree_track_simtrack_phi->at(i);
-//        float vxgen  = tree_track_genVertexPos_X->at(i);
-//        float vygen  = tree_track_genVertexPos_Y->at(i);
-//        float vzgen  = tree_track_genVertexPos_Z->at(i);
-//        float qR = tree_track_simtrack_charge->at(i) * ptSim * 100 / 0.3 / 3.8;
-//        float sin0 = qR * sin( phiSim ) + vxgen;
-//        float cos0 = qR * cos( phiSim ) - vygen;
-//        float phi0 = TMath::ATan2( sin0, cos0 ); // but note that it can be wrong by +_pi ! 
-
-//        dV1= 1000000.;
-//        dV2= 1000000.;
-//        if ( Gen_top1_r >= 0. ) 
-//        dV1 = (vxgen - Gen_top1_x)*(vxgen - Gen_top1_x)
-//        	   + (vygen - Gen_top1_y)*(vygen - Gen_top1_y)
-//            + (vzgen - Gen_top1_z)*(vzgen - Gen_top1_z);
-//        if ( Gen_top2_r >= 0. ) 
-//        dV2 = (vxgen - Gen_top2_x)*(vxgen - Gen_top2_x)
-//            + (vygen - Gen_top2_y)*(vygen - Gen_top2_y)
-//            + (vzgen - Gen_top2_z)*(vzgen - Gen_top2_z);
-//        dV = TMath::Sqrt(dV1);
-//        if ( dV2 < dV1 ) dV = TMath::Sqrt(dV2);
-// //$$
-//        if ( dV < 0.1 && dV1 <= dV2 ) iV = 1;
-//        if ( dV < 0.1 && dV2 < dV1 )  iV = 2;
-//        if ( dV < 0.1 ) track_isfromLLP[i] = iV;//1 or 2
-// //$$
-
-//        if ( iV == 1 ) {
-//          deltaPhi = DeltaPhi( Gen_top1_Vphi, phiSim );
-//          Vr = Gen_top1_r;
-//        }
-//        if ( iV == 2 ) {
-//          deltaPhi = DeltaPhi( Gen_top2_Vphi, phiSim );
-//          Vr = Gen_top2_r;
-//        }
-
-//        int genLLP = tree_track_simtrack_isFromLLP->at(i);
-//        if ( genLLP >= 1 ) hTkGenLLP_test->Fill( iV - genLLP );
-//        else               hTkGenLLPnot_test->Fill( iV );
-//        if ( genLLP >= 1 ) hTkGenLLP_dV->Fill( dV );
-//        else               hTkGenLLPnot_dV->Fill( dV );
-       
-//        if ( track_SELEC[i] ) {
-//          hTkSim_dV->Fill( dV );
-//          hTkSim_dV_big->Fill( dV );
-
-//          if ( iV >= 1 ) {
-//            hTkSim_dphiTop->Fill( abs(deltaPhi) );
-//            float dpt = (pt - ptSim) / pt;
-//            float deta = eta - etaSim;
-//            float dphi0 = phi - phi0;
-// 	   if      ( dphi0 < -3.14159 / 2. ) dphi0 = dphi0 + 3.14159;
-// 	   else if ( dphi0 >  3.14159 / 2. ) dphi0 = dphi0 - 3.14159;
-//            hTkSim_dq->Fill( q - qSim ); // why half of the reco tracks have a wrong charge ?
-//            hTkSim_dpt->Fill( dpt );
-//            hTkSim_deta->Fill( deta );
-//            hTkSim_dphi->Fill( phi - phiSim );
-//            hTkSim_dphi0->Fill( dphi0 );
-// 	   if ( abs(deta) < 0.1 && abs(dphi0) < 0.1 ) hTkSim_dpt_cut->Fill( dpt );
-//          }
-//        }
-//      }
-
+     if ( pt >= 1. && chi <= 5. && drSig >= 5. ) track_SELEC[i] = true;
    if ( !track_SELEC[i] ) continue;
-
-//      for (int k=0; k<ngenpart; k++)    // Loop on GenParticle
-//      {
-//      if ( gen_fromLLP[k] < 0 ) continue; 
-// //$$     if ( tree_genParticle_charge->at(k) != tree_track_charge->at(i) ) continue;
-//        hGenTk_pt->Fill( pt );
-// 
-//        float Gen_pt  = tree_genParticle_pt->at(k);
-//        float Gen_eta = tree_genParticle_eta->at(k);
-//        float Gen_phi = tree_genParticle_phi->at(k);
-//        float dpt  = pt / Gen_pt -1.;
-//        float deta = eta - Gen_eta;
-//        float dphi = phi - Gen_phi;
-//        float dphi0 = phi - gen_phi0[k];
-//        if      ( dphi0 < -3.14159 / 2. ) dphi0 = dphi0 + 3.14159;
-//        else if ( dphi0 >  3.14159 / 2. ) dphi0 = dphi0 - 3.14159;
-//        if ( iV >= 1 ) {
-//          hGenTk_LLP_dpt->Fill( dpt );
-//          hGenTk_LLP_deta->Fill( deta );
-//          hGenTk_LLP_dphi->Fill( dphi );
-//          hGenTk_LLP_dphi0->Fill( dphi0 );
-// 	 if ( abs(deta) < 0.1 && abs(dphi0) < 0.1 ) {
-//            hGenTk_LLP_dpt_cut->Fill( dpt );
-//            if ( tree_genParticle_charge->at(k) == tree_track_charge->at(i) ) hGenTk_LLP_dpt_cut_ss->Fill( dpt );
-//            else hGenTk_LLP_dpt_cut_os->Fill( dpt );
-// 	 }
-//        }
-//        else if ( ntracksim > 0 && ptSim > 0. && tree_track_isSimMatched->at(i) ) {
-//          hGenTk_Sim_dpt->Fill( dpt );
-//          hGenTk_Sim_deta->Fill( deta );
-//          hGenTk_Sim_dphi0->Fill( dphi0 );
-// 	 if ( abs(deta) < 0.1 && abs(dphi0) < 0.1 ) {
-//            hGenTk_Sim_dpt_cut->Fill( dpt );
-// 	 }
-//        }
-//        else {
-//          hGenTk_Oth_dpt->Fill( dpt );
-//          hGenTk_Oth_deta->Fill( deta );
-//          hGenTk_Oth_dphi0->Fill( dphi0 );
-// 	 if ( abs(deta) < 0.1 && abs(dphi0) < 0.1 ) {
-//            hGenTk_Oth_dpt_cut->Fill( dpt );
-//            if ( tree_genParticle_charge->at(k) == tree_track_charge->at(i) ) hGenTk_Oth_dpt_cut_ss->Fill( dpt );
-//            else hGenTk_Oth_dpt_cut_os->Fill( dpt );
-//            if ( abs(dpt) < 0.1 ) track_isfromLLP[i] = gen_fromLLP[k];
-// 	 }
-//        }
-//      }  // end Loop on GenParticle
 
      for (int k=0; k<ntrack; k++)    // Loop on other Tracks
      {
      if ( k == i ) continue;
        float pt2  = tree_track_pt->at(k);
-       float dr2 = abs(tree_track_dxy->at(k));
+       float dr2  = abs(tree_track_dxy->at(k));
        float drSig2 = -1.;
        if ( tree_track_dxyError->at(k) > 0 ) drSig2 = dr2 / tree_track_dxyError->at(k);
        float chi2 = tree_track_NChi2->at(k);
      if ( !(pt2 >= 1. && chi2 <= 5. && drSig2 >= 5.) ) continue;
-       float x2 = tree_track_firsthit_X->at(k);
-       float y2 = tree_track_firsthit_Y->at(k);
-       float z2 = tree_track_firsthit_Z->at(k);
+       float x2   = tree_track_firstHit_x->at(k);
+       float y2   = tree_track_firstHit_y->at(k);
+       float z2   = tree_track_firstHit_z->at(k);
        float dist = TMath::Sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) + (z1-z2)*(z1-z2) );
        if ( dist < 10. ) ntrk10++; 
        if ( dist < 20. ) ntrk20++; 
@@ -1853,7 +1569,9 @@ for (int i=0; i<ntrack; i++)
        if ( dist < 40. ) ntrk40++;
      }  // end Loop on other Tracks
 
-     if ( track_isfromLLP[i] > 0 ) {
+// sim tracks associated to reco tracks
+     float ptSim = tree_track_sim_pt->at(i);
+     if ( ptSim > 0. && track_isfromLLP[i] >= 1 ) {
        nTkSim++;
 
        hTkSim_pt->Fill( pt );
@@ -1875,22 +1593,26 @@ for (int i=0; i<ntrack; i++)
        hTkSim_at30->Fill( ntrk30 );
        hTkSim_at40->Fill( ntrk40 );
        
-       if ( tree_track_numberOfValidPixelBarrelHits->at(i) > 0 )         hTkSim_r1_PXB->Fill( r1 );
-       if ( tree_track_numberOfValidStripTIBHits->at(i) > 0 && tree_track_numberOfValidPixelBarrelHits->at(i) == 0 ) hTkSim_r1_TIB->Fill( r1 );
-       if ( tree_track_numberOfValidStripTOBHits->at(i) > 0 && tree_track_numberOfValidStripTIBHits->at(i) == 0 ) hTkSim_r1_TOB->Fill( r1 );
-       if ( tree_track_numberOfValidPixelEndcapHits->at(i) > 0 )         hTkSim_z1_PXF->Fill( abs(z1) );
-       if ( tree_track_numberOfValidStripTIDHits->at(i) > 0 && tree_track_numberOfValidPixelEndcapHits->at(i) == 0 ) hTkSim_z1_TID->Fill( abs(z1) );
-       if ( tree_track_numberOfValidStripTECHits->at(i) > 0 && tree_track_numberOfValidStripTIDHits->at(i) == 0 ) hTkSim_z1_TEC->Fill( abs(z1) );
+       if ( tree_track_nHitPXB->at(i) > 0 )                                     hTkSim_r1_PXB->Fill( r1 );
+       if ( tree_track_nHitTIB->at(i) > 0 && tree_track_nHitPixel->at(i) == 0 ) hTkSim_r1_TIB->Fill( r1 );
+       if ( tree_track_nHitTOB->at(i) > 0 && tree_track_nHitTIB->at(i) == 0 )   hTkSim_r1_TOB->Fill( r1 );
+       if ( tree_track_nHitPXF->at(i) > 0 )                                     hTkSim_z1_PXF->Fill( abs(z1) );
+       if ( tree_track_nHitTID->at(i) > 0 && tree_track_nHitPXF->at(i) == 0 )   hTkSim_z1_TID->Fill( abs(z1) );
+       if ( tree_track_nHitTEC->at(i) > 0 && tree_track_nHitTID->at(i) == 0 )   hTkSim_z1_TEC->Fill( abs(z1) );
+
+       float ctauLLP = ctau1;
+       if ( track_isfromLLP[i] == 2 ) ctauLLP = ctau2; 
+       hTkSim_ctauLLP->Fill( ctauLLP );
 
        float deltaR_neu, deltaPhi_neu;
-       deltaR   = DeltaR( eta, phi, vaxis1.Eta(), vaxis1.Phi() );//eta phi from the reco tracks, vaxis1 from the first axis defined by reco jets w/o muons in it
+       deltaR   = DeltaR( eta, phi, vaxis1.Eta(), vaxis1.Phi() );
        deltaPhi = DeltaPhi( phi, vaxis1.Phi() );
-       float deltaRop   = DeltaR( eta, phi, vaxis2.Eta(), vaxis2.Phi() );//same for the other axis
+       float deltaRop   = DeltaR( eta, phi, vaxis2.Eta(), vaxis2.Phi() );
        float deltaPhiop = DeltaPhi( phi, vaxis2.Phi() );
        if ( track_isfromLLP[i] == 1 ) {
          deltaR_neu = DeltaR( eta, phi, vneu[0].Eta(), vneu[0].Phi() );
          deltaPhi_neu = DeltaPhi( phi, vneu[0].Phi() );
-	 if ( -vaxis1*vneu[0] > 0 ) {//track could/couldnot be from LLP
+	 if ( -vaxis1*vneu[0] > 0 ) {
            hTkSim_tkjet_ok_DR->Fill( deltaR );
            hTkSim_tkjet_ok_dphi->Fill( abs(deltaPhi) );
 	 }
@@ -1899,14 +1621,12 @@ for (int i=0; i<ntrack; i++)
            hTkSim_tkjet_op_dphi->Fill( abs(deltaPhiop) );
 	 }
        }
-       else {//track isfromLLP
+       else {
          deltaR_neu = DeltaR( eta, phi, vneu[1].Eta(), vneu[1].Phi() );
          deltaPhi_neu = DeltaPhi( phi, vneu[1].Phi() );
-	 if ( -vaxis1*vneu[1] > 0 ) {//memberwise product:pt{axis}*pt{neu}-eta{axis}*eta{neu}-phi{axis}*phi{neu}>0
-      // check if the neutralino and axis (jet defined) are close are not depending on the sign
-      // compute -(-dR)
-           hTkSim_tkjet_ok_DR->Fill( deltaR );//LOOKAT
-           hTkSim_tkjet_ok_dphi->Fill( abs(deltaPhi) );//LOOKAT
+	 if ( -vaxis1*vneu[1] > 0 ) {
+           hTkSim_tkjet_ok_DR->Fill( deltaR );
+           hTkSim_tkjet_ok_dphi->Fill( abs(deltaPhi) );
          }
 	 else {
            hTkSim_tkjet_op_DR->Fill( deltaRop );
@@ -1916,8 +1636,162 @@ for (int i=0; i<ntrack; i++)
        hTkSim_tkneu_DR->Fill( deltaR_neu );
        hTkSim_tkneu_dphi->Fill( abs(deltaPhi_neu) );
        hTkSim_tkjet_DR->Fill( deltaR );
-       hTkSim_tkjet_dphi->Fill( abs(deltaPhi) );
-     }
+       hTkSim_tkjet_dphi->Fill( abs(deltaPhi) );       
+       float qSim   = tree_track_sim_charge->at(i);
+       float etaSim = tree_track_sim_eta->at(i);
+       float phiSim = tree_track_sim_phi->at(i);
+       float vxgen  = tree_track_sim_x->at(i);
+       float vygen  = tree_track_sim_y->at(i);
+       float vzgen  = tree_track_sim_z->at(i);
+
+       float qR = qSim * ptSim * 100 / 0.3 / 3.8;
+       float sin0 = qR * sin( phiSim ) + (vxgen - tree_GenPVx);
+       float cos0 = qR * cos( phiSim ) - (vygen - tree_GenPVy);
+       float phi0 = TMath::ATan2( sin0, cos0 ); // but note that it can be wrong by +_pi ! 
+
+       float dpt_TkSim  = (pt - ptSim) / pt;
+       float deta_TkSim = eta - etaSim;
+       float dphi_TkSim = phi - phi0;
+       if      ( dphi_TkSim < -3.14159 / 2. ) dphi_TkSim += 3.14159;
+       else if ( dphi_TkSim >  3.14159 / 2. ) dphi_TkSim -= 3.14159;
+
+       hTkSim_dq->Fill( q - qSim ); // why half of the reco tracks have a wrong charge ?
+       hTkSim_dpt->Fill( dpt_TkSim );
+       hTkSim_deta->Fill( deta_TkSim );
+       hTkSim_dphiraw->Fill( DeltaPhi( phi , phiSim ) );
+       hTkSim_dphi->Fill( dphi_TkSim );
+       if ( abs(deta_TkSim) < 0.1 && abs(dphi_TkSim) < 0.1 ) hTkSim_dpt_cut->Fill( dpt_TkSim );
+       if ( abs(dpt_TkSim)  < 0.1 && abs(dphi_TkSim) < 0.1 ) hTkSim_deta_cut->Fill( deta_TkSim );
+       if ( abs(dpt_TkSim)  < 0.1 && abs(deta_TkSim) < 0.1 ) hTkSim_dphi_cut->Fill( dphi_TkSim );
+	 
+       for (int k=0; k<ngenpart; k++)    // Loop on final Gen Particles
+       {
+       if ( tree_genParticle_statusCode->at(k) != 1 ) continue; 
+       if ( tree_genParticle_charge->at(k) == 0 ) continue; 
+       if ( tree_genParticle_pdgId->at(k) != tree_track_sim_pdgId->at(i) ) continue; 
+
+         float qGen   = tree_genParticle_charge->at(k);
+         float ptGen  = tree_genParticle_pt->at(k);
+         float etaGen = tree_genParticle_eta->at(k);
+         float phiGen = tree_genParticle_phi->at(k);
+         float xGen   = tree_genParticle_x->at(k);
+         float yGen   = tree_genParticle_y->at(k);
+
+         float dpt_SimGen   = ptSim / ptGen -1.;
+         float deta_SimGen  = etaSim - etaGen;
+         float dphi_SimGen  = DeltaPhi( phiSim , phiGen );
+
+         hSimGen_dq->Fill( qSim - qGen );
+         hSimGen_dpt->Fill( dpt_SimGen );
+         hSimGen_deta->Fill( deta_SimGen );
+         hSimGen_dphi->Fill( dphi_SimGen );
+         if ( abs(deta_SimGen) < 0.01 && abs(dphi_SimGen) < 0.01 ) hSimGen_dpt_cut->Fill( dpt_SimGen );
+         if ( abs(dpt_SimGen)  < 0.01 && abs(dphi_SimGen) < 0.01 ) hSimGen_deta_cut->Fill( deta_SimGen );
+         if ( abs(dpt_SimGen)  < 0.01 && abs(deta_SimGen) < 0.01 ) hSimGen_dphi_cut->Fill( dphi_SimGen );
+
+       if ( !(abs(dpt_SimGen)  < 0.01 && abs(deta_SimGen)  < 0.01 && abs(dphi_SimGen) < 0.01) ) continue;
+
+         qR = qGen * ptGen * 100 / 0.3 / 3.8;
+         sin0 = qR * sin( phiGen ) + (xGen - tree_GenPVx);
+         cos0 = qR * cos( phiGen ) - (yGen - tree_GenPVy);
+         phi0 = TMath::ATan2( sin0, cos0 ); // but note that it can be wrong by +_pi ! 
+
+         float dptGen  = (pt - ptGen) / pt;
+         float detaGen = eta - etaGen;
+         float dphiGen = phi - phi0;
+         if      ( dphiGen < -3.14159 / 2. ) dphiGen += 3.14159;
+         else if ( dphiGen >  3.14159 / 2. ) dphiGen -= 3.14159;
+
+         hTkGen_dq->Fill( q - qGen ); // why half of the reco tracks have a wrong charge ?
+         hTkGen_dpt->Fill( dptGen );
+         hTkGen_deta->Fill( detaGen );
+         hTkGen_dphi->Fill( dphiGen );
+         hTkGen_dphiraw->Fill( DeltaPhi( phi , phiGen ) );
+
+         if ( pt < 4. ) {
+            hTkGen_dpt_ptLT4->Fill( dptGen );
+           hTkGen_deta_ptLT4->Fill( detaGen );
+           hTkGen_dphi_ptLT4->Fill( dphiGen );
+         }
+         else {
+              hTkGen_dpt_ptGT4->Fill( dptGen );
+           hTkGen_deta_ptGT4->Fill( detaGen );
+           hTkGen_dphi_ptGT4->Fill( dphiGen );
+         }
+         if ( abs(eta) < 0.8 ) {
+            hTkGen_dpt_etaLT08->Fill( dptGen );
+           hTkGen_deta_etaLT08->Fill( detaGen );
+           hTkGen_dphi_etaLT08->Fill( dphiGen );
+         }
+         else {
+            hTkGen_dpt_etaGT08->Fill( dptGen );
+           hTkGen_deta_etaGT08->Fill( detaGen );
+           hTkGen_dphi_etaGT08->Fill( dphiGen );
+         }
+         if ( drSig < 170. ) {
+            hTkGen_dpt_drsigLT170->Fill( dptGen );
+           hTkGen_deta_drsigLT170->Fill( detaGen );
+           hTkGen_dphi_drsigLT170->Fill( dphiGen );
+         }
+         else {
+            hTkGen_dpt_drsigGT170->Fill( dptGen );
+           hTkGen_deta_drsigGT170->Fill( detaGen );
+           hTkGen_dphi_drsigGT170->Fill( dphiGen );
+         }
+         if ( inJet ) {
+            hTkGen_dpt_inJet->Fill( dptGen );
+           hTkGen_deta_inJet->Fill( detaGen );
+           hTkGen_dphi_inJet->Fill( dphiGen );
+         }
+         else {
+            hTkGen_dpt_NOTinJet->Fill( dptGen );
+           hTkGen_deta_NOTinJet->Fill( detaGen );
+           hTkGen_dphi_NOTinJet->Fill( dphiGen );
+         }
+         if ( hit <= 15 ) {
+            hTkGen_dpt_hitLE15->Fill( dptGen );
+           hTkGen_deta_hitLE15->Fill( detaGen );
+           hTkGen_dphi_hitLE15->Fill( dphiGen );
+         }
+         else {
+            hTkGen_dpt_hitGT15->Fill( dptGen );
+           hTkGen_deta_hitGT15->Fill( detaGen );
+           hTkGen_dphi_hitGT15->Fill( dphiGen );
+         }
+         if ( ctauLLP < 9. ) {
+            hTkGen_dpt_ctauLT9->Fill( dptGen );
+           hTkGen_deta_ctauLT9->Fill( detaGen );
+           hTkGen_dphi_ctauLT9->Fill( dphiGen );
+         }
+         else {
+            hTkGen_dpt_ctauGT9->Fill( dptGen );
+           hTkGen_deta_ctauGT9->Fill( detaGen );
+           hTkGen_dphi_ctauGT9->Fill( dphiGen );
+         }
+
+if ( hit <= 10 ) {
+            hTkGen_dpt_hitLE10->Fill( dptGen );
+           hTkGen_deta_hitLE10->Fill( detaGen );
+           hTkGen_dphi_hitLE10->Fill( dphiGen );
+         }
+         else if ( hit <= 13 ) {
+            hTkGen_dpt_11hit13->Fill( dptGen );
+           hTkGen_deta_11hit13->Fill( detaGen );
+           hTkGen_dphi_11hit13->Fill( dphiGen );
+         }
+         else if ( hit <= 17 ) {
+            hTkGen_dpt_14hit17->Fill( dptGen );
+           hTkGen_deta_14hit17->Fill( detaGen );
+           hTkGen_dphi_14hit17->Fill( dphiGen );
+         }
+         else {
+            hTkGen_dpt_hitGE18->Fill( dptGen );
+           hTkGen_deta_hitGE18->Fill( detaGen );
+           hTkGen_dphi_hitGE18->Fill( dphiGen );
+         }
+       }  // end Loop on final Gen Particles
+
+     } // endif simtrack
 
      else {
        nTkOth++;
@@ -1944,61 +1818,386 @@ for (int i=0; i<ntrack; i++)
        deltaPhi = DeltaPhi( phi, vaxis1.Phi() );
        hTkOth_tkjet_DR->Fill( deltaR );
        hTkOth_tkjet_dphi->Fill( abs(deltaPhi) );
+     } // endif other tracks
+     
+     if ( track_isfromLLP[i] == 1 && tree_track_MVAval->at(i) > -0.0401 ) {
+       itrack_LLP1[ntrack_LLP1]    = i;
+       track_mva_LLP1[ntrack_LLP1] = tree_track_MVAval->at(i);
+       ntrack_LLP1++;
+     }
+     if ( track_isfromLLP[i] == 2 && tree_track_MVAval->at(i) > -0.0401 ) {
+       itrack_LLP2[ntrack_LLP2]    = i;
+       track_mva_LLP2[ntrack_LLP2] = tree_track_MVAval->at(i);
+       ntrack_LLP2++;
      }
 
-   }  // end Loop on Track or TrackSim
-    
+     // match gen track to reco track
+     bool matchGen = false;
+     for (int k=0; k<ngenpart; k++)    // reLoop on final Gen Particles
+     {
+     if ( tree_genParticle_statusCode->at(k) != 1 ) continue; 
+     if ( tree_genParticle_charge->at(k) != q ) continue; 
+
+       float qGen   = tree_genParticle_charge->at(k);
+       float ptGen  = tree_genParticle_pt->at(k);
+       float etaGen = tree_genParticle_eta->at(k);
+       float phiGen = tree_genParticle_phi->at(k);
+       float xGen   = tree_genParticle_x->at(k);
+       float yGen   = tree_genParticle_y->at(k);
+
+       float qR = qGen * ptGen * 100 / 0.3 / 3.8;
+       float sin0 = qR * sin( phiGen ) + (xGen - tree_GenPVx);
+       float cos0 = qR * cos( phiGen ) - (yGen - tree_GenPVy);
+       float phi0 = TMath::ATan2( sin0, cos0 ); // but note that it can be wrong by +_pi ! 
+
+       float dptGen  = (pt - ptGen) / pt;
+       float detaGen = eta - etaGen;
+       float dphiGen = phi - phi0;
+       if      ( dphiGen < -3.14159 / 2. ) dphiGen += 3.14159;
+       else if ( dphiGen >  3.14159 / 2. ) dphiGen -= 3.14159;
+
+       if ( hit <= 10 ) {
+         if ( abs(dptGen) < 0.70 && abs(detaGen) < 0.30 && abs(dphiGen) < 0.08 ) matchGen = true; 
+         if ( ptSim > 0. && track_isfromLLP[i] >= 1 ) {
+           if ( abs(detaGen) < 0.30 && abs(dphiGen) < 0.08 ) hTkMatch_LLP_dpt_hitLE10->Fill( dptGen );
+	 }
+	 else {
+           if ( abs(detaGen) < 0.30 && abs(dphiGen) < 0.08 ) hTkMatch_NoLLP_dpt_hitLE10->Fill( dptGen );
+	 }
+       }
+       else if ( hit <= 13 ) {
+         if ( abs(dptGen) < 0.20 && abs(detaGen) < 0.12 && abs(dphiGen) < 0.05 ) matchGen = true; 
+         if ( ptSim > 0. && track_isfromLLP[i] >= 1 ) {
+           if ( abs(detaGen) < 0.12 && abs(dphiGen) < 0.05 ) hTkMatch_LLP_dpt_11hit13->Fill( dptGen );
+	 }
+	 else {
+           if ( abs(detaGen) < 0.12 && abs(dphiGen) < 0.05 ) hTkMatch_NoLLP_dpt_11hit13->Fill( dptGen );
+	 }
+       }
+       else if ( hit <= 17 ) {
+         if ( abs(dptGen) < 0.08 && abs(detaGen) < 0.04 && abs(dphiGen) < 0.03 ) matchGen = true; 
+         if ( ptSim > 0. && track_isfromLLP[i] >= 1 ) {
+           if ( abs(detaGen) < 0.04 && abs(dphiGen) < 0.03 ) hTkMatch_LLP_dpt_14hit17->Fill( dptGen );
+	 }
+	 else {
+           if ( abs(detaGen) < 0.04 && abs(dphiGen) < 0.03 ) hTkMatch_NoLLP_dpt_14hit17->Fill( dptGen );
+	 }
+       }
+       else {
+         if ( abs(dptGen) < 0.07 && abs(detaGen) < 0.02 && abs(dphiGen) < 0.02 ) matchGen = true; 
+         if ( ptSim > 0. && track_isfromLLP[i] >= 1 ) {
+           if ( abs(detaGen) < 0.02 && abs(dphiGen) < 0.02 ) hTkMatch_LLP_dpt_hitGE18->Fill( dptGen );
+	 }
+	 else {
+           if ( abs(detaGen) < 0.02 && abs(dphiGen) < 0.02 ) hTkMatch_NoLLP_dpt_hitGE18->Fill( dptGen );
+	 }
+       }
+     }  // end Loop on final Gen Particles
+
+     if ( ptSim > 0. && track_isfromLLP[i] >= 1 ) {
+       if (  matchGen ) hTkMatch_LLP_hit->Fill( hit );
+       if ( !matchGen ) hTkNoMatch_LLP_hit->Fill( hit );
+     }
+     else {
+       if (  matchGen ) hTkMatch_NoLLP_hit->Fill( hit );
+       if ( !matchGen ) hTkNoMatch_NoLLP_hit->Fill( hit );
+     }
+
+   }  // end Loop on Tracks
+
    hTkSim->Fill( nTkSim );
    hTkOth->Fill( nTkOth );
    hTkAll->Fill( nTkSim + nTkOth );
+   
+   hDataGen_LLP_nTrks->Fill( ntrack_LLP1 );
+   hDataGen_LLP_nTrks->Fill( ntrack_LLP2 );
+   int index_LLP1[100], index_LLP2[100];
+   int ii0, ii;
+   if ( ntrack_LLP1 > 1 ) {
+     TMath::Sort( ntrack_LLP1, track_mva_LLP1, index_LLP1 );
+     for (int i=0; i<ntrack_LLP1; i++) {
+       ii = index_LLP1[i];
+       float pt  = tree_track_pt->at(itrack_LLP1[ii]);
+       float eta = tree_track_eta->at(itrack_LLP1[ii]);
+       float phi = tree_track_phi->at(itrack_LLP1[ii]);
+       dR = DeltaR( eta, phi, vneu[0].Eta(), vneu[0].Phi() );
+       deta = abs(eta - vneu[0].Eta());
+       dphi = abs(DeltaPhi( vneu[0].Phi(), phi ));
+       hDataGen_LLP_track_dR->Fill( dR );
+       hDataGen_LLP_track_deta->Fill( deta );
+       hDataGen_LLP_track_dphi->Fill( dphi );
+       if (i == 0 ) {
+         hDataGen_LLP_track0_mva->Fill( track_mva_LLP1[ii] );
+         hDataGen_LLP_track0_dR->Fill( dR );
+       }
+       else {
+         ii0 = index_LLP1[i-1];
+         hDataGen_LLP_track_mvatest->Fill( track_mva_LLP1[ii0] - track_mva_LLP1[ii] );
+       }
+     }
+   }
+   if ( ntrack_LLP2 > 1 ) {
+     TMath::Sort( ntrack_LLP2, track_mva_LLP2, index_LLP2 );
+     for (int i=0; i<ntrack_LLP2; i++) {
+       ii = index_LLP2[i];
+       float pt  = tree_track_pt->at(itrack_LLP2[ii]);
+       float eta = tree_track_eta->at(itrack_LLP2[ii]);
+       float phi = tree_track_phi->at(itrack_LLP2[ii]);
+       dR = DeltaR( eta, phi, vneu[1].Eta(), vneu[1].Phi() );
+       deta = abs(eta - vneu[1].Eta());
+       dphi = abs(DeltaPhi( vneu[1].Phi(), phi ));
+       hDataGen_LLP_track_dR->Fill( dR );
+       hDataGen_LLP_track_deta->Fill( deta );
+       hDataGen_LLP_track_dphi->Fill( dphi );
+       if (i == 0 ) {
+         hDataGen_LLP_track0_mva->Fill( track_mva_LLP2[ii] );
+         hDataGen_LLP_track0_dR->Fill( dR );
+       }
+       else {
+         ii0 = index_LLP2[i-1];
+         hDataGen_LLP_track_mvatest->Fill( track_mva_LLP2[ii0] - track_mva_LLP2[ii] );
+       }
+     }
+   }
+
+// Hemisphere study
+
+   for (unsigned int i=0; i<tree_Hemi->size(); i++) {
+    //  float Hemi_LLP_dist  = tree_Hemi_LLP_dist->at(i);//to change when ttbar
+    //  bool  Hemi_LLP_ping  = tree_Hemi_LLP_ping->at(i);//to change when ttbar
+         float Hemi_LLP_dist  = 0;//when MC Signal
+     bool  Hemi_LLP_ping  = 0;//when MC Signal
+    
+
+     float Hemi_Vtx_NChi2 = tree_Hemi_Vtx_NChi2->at(i);
+     int   Hemi_Vtx_step  = tree_Hemi_Vtx_step->at(i);
+     hData_Hemi_Vtx_NChi2_all->Fill( Hemi_Vtx_NChi2 );
+     hSim_Hemi_LLP_dist->Fill( Hemi_LLP_dist );
+     if ( Hemi_Vtx_NChi2 != -10 ) {
+       hData_Hemi_Vtx_NChi2->Fill( Hemi_Vtx_NChi2 );
+       hSim_Hemi_LLP_dist_chiOK->Fill( Hemi_LLP_dist );
+     }
+
+     if ( Hemi_Vtx_NChi2 > 0 && Hemi_Vtx_NChi2 < 10) {//TTbar 198 entries
+       hData_Hemi_Vtx_nTrks->Fill( tree_Hemi_Vtx_nTrks->at(i) );//ok
+       if ( Hemi_Vtx_step == 1 ) hData_Hemi_Vtx_nTrks_step1->Fill( tree_Hemi_Vtx_nTrks->at(i) );
+       if ( Hemi_Vtx_step == 2 ) hData_Hemi_Vtx_nTrks_step2->Fill( tree_Hemi_Vtx_nTrks->at(i) );
+       if ( Hemi_Vtx_step == 3 ) hData_Hemi_Vtx_nTrks_step3->Fill( tree_Hemi_Vtx_nTrks->at(i) );
+
+       if ( Hemi_Vtx_step == 1 )  hData_Hemi_Vtx_dist_step1->Fill( tree_Hemi_Vtx_dist->at(i) );
+       if ( Hemi_Vtx_step == 2 ) hData_Hemi_Vtx_dist_step2->Fill( tree_Hemi_Vtx_dist->at(i) );
+       if ( Hemi_Vtx_step == 3 ) hData_Hemi_Vtx_dist_step3->Fill( tree_Hemi_Vtx_dist->at(i) );
+       hData_Hemi_Vtx_dist->Fill( tree_Hemi_Vtx_dist->at(i) );
+  
+      //  hSim_Hemi_Vtx_dx->Fill( tree_Hemi_Vtx_dx->at(i) );//to change when ttbar
+      //  hSim_Hemi_Vtx_dy->Fill( tree_Hemi_Vtx_dy->at(i) );//to change when ttbar
+      //  hSim_Hemi_Vtx_dz->Fill( tree_Hemi_Vtx_dz->at(i) );//to change when ttbar
+      //  hSim_Hemi_Vtx_dd->Fill( tree_Hemi_Vtx_dd->at(i) );//to change when ttbar
+
+      //  if (tree_Hemi_Vtx_dd->at(i)<0.1)
+      //   {
+      //     hData_Hemi_Vtx_dist_rel->Fill(tree_Hemi_Vtx_dist->at(i));
+      //   }
+     }
+
+     if ( Hemi_Vtx_NChi2 > 0 && Hemi_Vtx_NChi2 < 10 && Hemi_LLP_ping ) {
+       hSim_Hemi_LLP_dist_ping->Fill( Hemi_LLP_dist );
+       if ( Hemi_Vtx_step == 1 ) hSim_Hemi_LLP_dist_ping_step1->Fill( Hemi_LLP_dist );
+       if ( Hemi_Vtx_step == 2 ) hSim_Hemi_LLP_dist_ping_step2->Fill( Hemi_LLP_dist );
+       if ( Hemi_Vtx_step == 3 ) hSim_Hemi_LLP_dist_ping_step3->Fill( Hemi_LLP_dist );
+     }
+   }
+
+   //Signal Vertex
+      for (unsigned int i = 0 ; i< tree_Hemi_Vtx_NChi2->size(); i++)
+        {
+          if(abs(tree_Hemi_Vtx_NChi2->at(i)) < 10. && tree_Hemi_nTrks->at(i)>1)
+            {
+              nVertex++;
+              hData_Hemi_Vtx_r->Fill(sqrt(tree_Hemi_Vtx_x->at(i)*tree_Hemi_Vtx_x->at(i)+tree_Hemi_Vtx_y->at(i)*tree_Hemi_Vtx_y->at(i)));
+              hData_Hemi_Vtx_z->Fill(tree_Hemi_Vtx_z->at(i));
+              hData_Hemi_Vtx_rvsz->Fill(tree_Hemi_Vtx_z->at(i),sqrt(tree_Hemi_Vtx_x->at(i)*tree_Hemi_Vtx_x->at(i)+tree_Hemi_Vtx_y->at(i)*tree_Hemi_Vtx_y->at(i)));
+            }
+        }
+
+        //---------------------------------------------------------//
+
+    for (unsigned int j = 0 ; j< tree_track_dxy->size();j++)
+      {
+        hData_track_dxy->Fill(tree_track_dxy->at(j));
+        hData_track_dz->Fill(tree_track_dz->at(j));
+        hData_track_dxyvsdz->Fill(tree_track_dxy->at(j),tree_track_dz->at(j));
+      }
+    // for (unsigned int i = 0 ; i < tree_track_PU_dxy->size(); i++ )
+    //   {
+    //     hData_track_PU_dxy->Fill(tree_track_PU_dxy->at(i));
+    //     hData_track_PU_dz->Fill(tree_track_PU_dz->at(i));
+    //     hData_track_PU_dxyvsdz->Fill(tree_track_PU_dxy->at(i),tree_track_PU_dz->at(i));
+    //   }
+
+     //-------------------------------------------------------//
+
+// delta R between Gen and Reco
+    for (unsigned int j = 0 ; j< tree_Hemi_dR->size();j++)
+      {
+        hData_dR_GenReco->Fill(tree_Hemi_dR->at(j));
+        // hData_dR_GenGen->Fill(tree_Hemi_LLP_dR12->at(j));////to change when ttbar
+        hData_dR_RecoReco->Fill(tree_Hemi_dR12->at(j));
+        // hGenReco_dR->Fill(tree_Hemi_LLP_dR12->at(j),tree_Hemi_dR12->at(j));//to change when ttbar
+      }
+
+//Photon COnversion
+    for (unsigned int j = 0 ; j< tree_Yc_x->size();j++)
+      {
+        if(tree_Yc_mass->at(j)>0 && tree_Yc_mass->at(j)<1 && tree_Yc_NChi2->at(j)<10 && abs(tree_Yc_eta->at(j)<1.5&&tree_Yc_r->at(j)<20))
+          {
+            hData_Yc_xy->Fill(tree_Yc_x->at(j),tree_Yc_y->at(j));
+          }
+      }
+
+//Secodary Interaction
+    for (unsigned int j = 0 ; j< tree_SecInt_x->size();j++)
+      {
+        if(abs(tree_SecInt_eta->at(j))<1.5&&tree_SecInt_r->at(j)<20&& tree_SecInt_selec->at(j))
+          {
+            hData_SecInt_xy->Fill(tree_SecInt_x->at(j),tree_SecInt_y->at(j));
+          }
+      }
+//V0Candidates
+
+    for (unsigned int j = 0 ; j< tree_V0_reco_mass->size();j++)
+      {
+        if(tree_V0_reco_source->at(j)==1)
+          {
+            hData_K0Mass->Fill(tree_V0_reco_mass->at(j));
+          }
+        else if(tree_V0_reco_source->at(j)==2)
+          {
+            hData_L0Mass->Fill(tree_V0_reco_mass->at(j));
+          }
+      }
+      //-------------------------------------------------------//
+      // MVA Output
+          for (unsigned int j = 0 ; j< tree_track_MVAval->size();j++)
+      {
+        if(tree_track_MVAval->at(j)>-2)
+          {
+            hData_MVAVal->Fill(tree_track_MVAval->at(j));
+            hData_IsFromLLP->Fill(tree_track_sim_LLP->at(j));
+          }
+      }
 
 
 
 
+    for (unsigned int j = 0 ; j< tree_track_MVAval->size();j++)
+      {
+        if (tree_track_MVAval->at(j)>-1 && tree_track_sim_LLP->at(j)>0)
+            {
+              nSTracks++;
+            }
+          else if (tree_track_MVAval->at(j)>-1 && tree_track_sim_LLP->at(j)<0)
+            {
+              nDTracks++;
+            }
+      }
 
- } // end loop on events 
+  for (int i =0 ;i<nStep;i++)
+    {
+      float nSelecTrack = 0;
+      float nDiscardTrack = 0;
+    for (unsigned int j = 0 ; j< tree_track_MVAval->size();j++)
+      {
+        if (tree_track_MVAval->at(j)>bdtcut+i*delta && tree_track_sim_LLP->at(j)>0)
+            {
+              nSelecTracks[i]++;
+              nSelecTrack++;
+              
+            }
+          else if (tree_track_MVAval->at(j)>bdtcut+i*delta && tree_track_sim_LLP->at(j)<0)
+            {
+              nDiscardTracks[i]++;
+              nDiscardTrack++;
+            }
+      }
 
- std::cout << "number of events  "<< allevents << std::endl; 
+      float SignalEff = 0.;
+      float BkgEff = 0.;
+      if (nSTracks !=0)
+        {
+          SignalEff =  nSelecTrack/nSTracks;
+        }
+      if (nDTracks !=0)
+        {
+          BkgEff = nDiscardTrack/nDTracks;
+        }
+
+      // std::cout << "size : "<< tree_track_sim_LLP->size() << std::endl;
+      // std::cout << "iteration : "<< bdtcut+i*delta << std::endl;
+      // hSignalEff->Fill(bdtcut+i*delta,SignalEff);
+      // hBkgEff->Fill(bdtcut+i*delta,BkgEff);
+      // hBkfEff_SigEff->Fill(SignalEff,BkgEff);   
+   }
+
+// ttree->Draw("tree_SecInt_x:tree_SecInt_y","")   
+//----------Veto---------/
+
+for (unsigned int i=0;i<tree_SecInt_x->size();i++)
+  {
+    if(tree_SecInt_selec->at(i)&&tree_SecInt_layer->at(i)!=0 && abs(tree_SecInt_x->at(i))<25 && abs(tree_SecInt_y->at(i))<25)
+      {
+        hData_Veto->Fill(tree_SecInt_x->at(i),tree_SecInt_y->at(i));
+      }
+  }
+
+    std::cout << "number of events  "<< allevents << std::endl; 
 //  std::cout << "number of tracks  "<< nRecoTracks << std::endl; 
 //  std::cout << "number of jets    "<< nJets << std::endl; 
+   }
+ } // end loop on events 
+
+     std::cout<<"nStracks : "<<nSTracks<<std::endl;
+    std::cout<<"nDTracks : "<<nDTracks<<std::endl;
+
+ float sig_max;
+ float bdtcutopti = 0;
+ float inte = 0;
+  for (int i =0; i<nStep;i++)
+    {
+      // std::cout<<bdtcut+i*delta<<": bdtcut+i*delta& "<<nSelecTracks[i]<<" nSelecTracks[i] "<<std::endl;
+      hSignalEff->Fill(bdtcut+i*delta,nSelecTracks[i]/nSTracks);
+      hBkgEff->Fill(bdtcut+i*delta,nDiscardTracks[i]/nDTracks);
+      hBkfEff_SigEff->Fill(nSelecTracks[i]/nSTracks,1-nDiscardTracks[i]/nDTracks);
+      sig[i]=nSelecTracks[i]/sqrt(nSelecTracks[i]+nDiscardTracks[i]);
+      inte += sig[i];
+      if(i>0)
+        {
+          sig_max=sig[0];
+          if(sig[i]>sig_max)
+            {
+              sig_max=sig[i];
+              bdtcutopti = bdtcut+i*delta;
+            } 
+        }
+      h_sig->Fill(bdtcut+i*delta,sig[i]);
+    }
+    inte= inte/nStep;
+    std::cout<<"bdtcutopti : "<<bdtcutopti<<std::endl;
+    std::cout<<"inte : "<<inte<<std::endl;
+  // double error=0;
+  // double AUC = hBkfEff_SigEff->IntegralAndError(0,1,0,1,error);
+  // std::cout<<"Integral Value : "<<AUC<<" +-"<<error<<std::endl;
 //################################################
-// float ratioHSCP = nRecoTracks/maxSize;//1-fakerate
+
 // Output Postscript
-// std::cout << "Recoefficiency  "<< ratioHSCP << std::endl; 
+
 //   TCanvas* c = new TCanvas("c");
-  // hData_nPV -> Draw();
-  h1->SetLineColor(kRed);
-  hData_FakeRate_vs_pt->SetLineColor(kBlue);
-  //h1->Draw("");
-  hData_FakeRate_vs_pt->Divide(h1);
-  // hData_FakeRate_vs_pt->Draw();
-  h1->SetTitle("Blue: isSimMatched / Red:All tracks// Cuts applied");
-  // h1->Draw();
-  // h_DataHSCP->Draw("SAME");
+  hData_nPV -> Draw(); 
 //   c->Print("output.ps(");
-
-
-
-//####################
-// SignalEff=nSignalTracks/;
-// BkgEff=nBkgTracks/;
-float Mva_SignalEff=n_Mva_SignalTracks/nTrackingPerfSignal;//nTrackingPerfSignal contains the mismatch of signal tracks//n-Mva_SignalTracks does not
-float Mva_BkgEff=n_Mva_BkgTracks/nTrackingPerfBkg;//nTrackingPerfBkg contains the mismatch of signal tracks//n-Mva_BkgTracks does not
-float Significance=nSignalTracks/sqrt(nSignalTracks+nBkgTracks);//nBkgTracks contains the mismacth of signal tracks
-float MVA_Significance=n_Mva_SignalTracks/sqrt(n_Mva_SignalTracks+n_Mva_BkgTracks);//n_Mva_BkgTracks contains the mismacth of signal tracks
- std::cout << "n_Mva_SignalTracks  "<< n_Mva_SignalTracks << std::endl; 
- std::cout << "nTrackingPerfSignal "<<nTrackingPerfSignal << std::endl; 
- std::cout << "n_Mva_BkgTracks  "<< n_Mva_BkgTracks << std::endl; 
- std::cout << "nTrackingPerfBkg  "<< nTrackingPerfBkg << std::endl; 
- std::cout << "Mva_SignalEff  "<< Mva_SignalEff << std::endl; //86
- std::cout << "Mva_BkgEff  "<< Mva_BkgEff << std::endl; //21
- std::cout << "Significance   "<< Significance << std::endl; 
- std::cout << "MVA_Significance   "<< MVA_Significance << std::endl; //228
+  
 //################################################
   HistogramManager h ;
-
+  
   h.WriteAllHistogramsInFile(filename.Data(),"recreate");
 //################################################
-}   
-
-
+}
