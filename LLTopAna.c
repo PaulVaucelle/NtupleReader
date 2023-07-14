@@ -10,7 +10,9 @@
 #include "TRandom.h"
 #include "TMath.h"
 #include <iostream>
-
+#include <fstream>
+#include <string>
+#include <sstream>
 void SetSebStyle()
 {
  gStyle->SetTitleFillColor(42);
@@ -85,7 +87,7 @@ void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
 //**********************************
 
  TH1F* hDataAll_nZMu     = new TH1F("hDataAll_nZMu","",11,-0.5,10.5);
- TH1F* hDataAll_Jet_njet = new TH1F("hDataAll_Jet_njet","",40,-0.5,29.5);
+ TH1F* hDataAll_Jet_njet = new TH1F("hDataAll_Jet_njet","",31,0,30);
  TH1F* hDataAll_Jet_pt   = new TH1F("hDataAll_Jet_pt","",100,0.,1000.);
  TH1F* hDataAll_Jet_eta	 = new TH1F("hDataAll_Jet_eta","",50,-2.5,2.5);
  TH1F* hDataAll_Jet_phi	 = new TH1F("hDataAll_Jet_phi","",66,-3.3,3.3);
@@ -188,7 +190,7 @@ void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hData_MET_phi	   = new TH1F("hData_MET_phi","",66,-3.3,3.3);
 
  TH1F* hData_Jet_njet      = new TH1F("hData_Jet_njet","",20,-0.5,19.5);
- TH1F* hData_Jet_pt        = new TH1F("hData_Jet_pt","",100,0.,1000.);
+//  TH1F* hData_Jet_pt        = new TH1F("hData_Jet_pt","",100,0.,1000.);
  TH1F* hData_Jet_eta	   = new TH1F("hData_Jet_eta","",50,-2.5,2.5);
  TH1F* hData_Jet_phi	   = new TH1F("hData_Jet_phi","",66,-3.3,3.3);
  TH1F* hData_Jet_pt1       = new TH1F("hData_Jet_pt1","",100,0.,1000.);
@@ -421,23 +423,23 @@ void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
  TH1F* hData_Hemi_Vtx_nTrks_step1 = new TH1F("hData_Hemi_Vtx_nTrks_step1","",40,0.5,40.5);
  TH1F* hData_Hemi_Vtx_nTrks_step2 = new TH1F("hData_Hemi_Vtx_nTrks_step2","",40,0.5,40.5);
  TH1F* hData_Hemi_Vtx_nTrks_step3 = new TH1F("hData_Hemi_Vtx_nTrks_step3","",40,0.5,40.5);
- TH1F* hData_Hemi_Vtx_dist      = new TH1F("hData_Hemi_Vtx_dist","",50,0.,100.);
+//  TH1F* hData_Hemi_Vtx_dist      = new TH1F("hData_Hemi_Vtx_dist","",50,0.,100.);
 
- TH1F* hSim_Hemi_LLP_dist       = new TH1F("hSim_Hemi_LLP_dist","",50,0.,100.);
- TH1F* hSim_Hemi_LLP_dist_chiOK = new TH1F("hSim_Hemi_LLP_dist_chiOK","",50,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist       = new TH1F("hSim_Hemi_LLP_dist","",10,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_chiOK = new TH1F("hSim_Hemi_LLP_dist_chiOK","",10,0.,100.);
  TH1F* hSim_Hemi_Vtx_dx         = new TH1F("hSim_Hemi_Vtx_dx","",200,-1.,1.);
  TH1F* hSim_Hemi_Vtx_dy         = new TH1F("hSim_Hemi_Vtx_dy","",200,-1.,1.);
  TH1F* hSim_Hemi_Vtx_dz         = new TH1F("hSim_Hemi_Vtx_dz","",200,-1.,1.);
  TH1F* hSim_Hemi_Vtx_dd         = new TH1F("hSim_Hemi_Vtx_dd","",100,0.,1.);
- TH1F* hSim_Hemi_LLP_dist_ping  = new TH1F("hSim_Hemi_LLP_dist_ping","",50,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_ping  = new TH1F("hSim_Hemi_LLP_dist_ping","",10,0.,100.);
 
- TH1F*  hData_Hemi_Vtx_dist_step1 = new TH1F("hData_Hemi_Vtx_dist_step1","",50,0.,100.);
+//  TH1F*  hData_Hemi_Vtx_dist_step1 = new TH1F("hData_Hemi_Vtx_dist_step1","",50,0.,100.);
  TH1F*  hData_Hemi_Vtx_dist_step2 = new TH1F("hData_Hemi_Vtx_dist_step2","",50,0.,100.);
  TH1F*  hData_Hemi_Vtx_dist_step3 = new TH1F("hData_Hemi_Vtx_dist_step3","",50,0.,100.);
 
- TH1F* hSim_Hemi_LLP_dist_ping_step1 = new TH1F("hSim_Hemi_LLP_dist_ping_step1","",50,0.,100.);
- TH1F* hSim_Hemi_LLP_dist_ping_step2 = new TH1F("hSim_Hemi_LLP_dist_ping_step2","",50,0.,100.);
- TH1F* hSim_Hemi_LLP_dist_ping_step3 = new TH1F("hSim_Hemi_LLP_dist_ping_step3","",50,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_ping_step1 = new TH1F("hSim_Hemi_LLP_dist_ping_step1","",10,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_ping_step2 = new TH1F("hSim_Hemi_LLP_dist_ping_step2","",10,0.,100.);
+ TH1F* hSim_Hemi_LLP_dist_ping_step3 = new TH1F("hSim_Hemi_LLP_dist_ping_step3","",10,0.,100.);
 
   TH1F*   hData_track_dpt           = new TH1F("hData_track_dpt","hData_track_dpt",100,0.,15.);
   TH1F*   hData_track_deta          = new TH1F("hData_track_deta","hData_track_deta",201,-6.5,6.5);
@@ -454,9 +456,10 @@ void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
   TH1F*    hData_Hemi_Vtx_bkg_z            = new TH1F("hData_Hemi_Vtx_bkg_z","hData_Hemi_Vtx_bkg_z",401,-200,200);
   TH2F*    hData_Hemi_Vtx_bkg_rvsz         = new TH2F("hData_Hemi_Vtx_bkg_rvsz","hData_Hemi_Vtx_bkg_rvsz",401,-200,200,1001,5,50);
 
-  TH1F*    hData_Hemi_Vtx_r            = new TH1F("hData_Hemi_Vtx_r","hData_Hemi_Vtx_r",1001,0,50);
+  // TH1F*    hData_Hemi_Vtx_r            = new TH1F("hData_Hemi_Vtx_r","hData_Hemi_Vtx_r",1001,0,50);
   TH1F*    hData_Hemi_Vtx_z            = new TH1F("hData_Hemi_Vtx_z","hData_Hemi_Vtx_z",401,-200,200);
   TH2F*    hData_Hemi_Vtx_rvsz         = new TH2F("hData_Hemi_Vtx_rvsz","hData_Hemi_Vtx_rvsz",401,-200,200,1001,5,50);
+  TH2F*    hData_Hemi_Vtx_xvsy         = new TH2F("hData_Hemi_Vtx_xvsy","hData_Hemi_Vtx_xvsy",10001,-26,26,1001,-26,26);
 
   TH1F*    hData_track_PU_dz            = new TH1F("hData_track_PU_dz","hData_track_PU_dz",101,-50,50);
   TH1F*    hData_track_PU_dxy           = new TH1F("hData_track_PU_dxy","hData_track_PU_dxy",101,-50,50);
@@ -473,9 +476,22 @@ void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
   
 
   TH2F*          hData_Yc_xy       = new TH2F("hData_Yc_xy","hData_Yc_xy",601,-25,25,601,-25,25);
-  TH2F*          hData_SecInt_xy   = new TH2F("hData_SecInt_xy","hData_SecInt_xy",601,-25,25,601,-25,25);
-  TH1F*          hData_K0Mass      = new TH1F("hData_K0Mass","hData_K0Mass",101,0.42,0.58);
-  TH1F*          hData_L0Mass      = new TH1F("hData_L0Mass","hData_L0Mass",101,1.06,1.18);
+  TH2F*          hData_SecInt_xy   = new TH2F("hData_SecInt_xy","hData_SecInt_xy",10001,-25,25,10001,-25,25);
+  // TH1F*          hData_SecInt_eta =     = new TH1F()
+  TH1F*          hData_reco_K0Mass      = new TH1F("hData_reco_K0Mass","hData_reco_K0Mass",101,0.42,0.58);
+  TH1F*          hData_reco_L0Mass      = new TH1F("hData_reco_L0Mass","hData_reco_L0Mass",101,1.06,1.18);
+  TH2F*         hData_reco_V0xy         = new TH2F("hData_reco_V0xy","hData_reco_V0xy",101,-50,50,101,-50,50);
+
+          TH1F*          hData_K0Mass      = new TH1F("hData_K0Mass","hData_K0Mass",101,0.42,0.58);
+          TH1F*          hData_K0x      = new TH1F("hData_K0x","hData_K0x",200,-100,100);
+          TH1F*          hData_K0y      = new TH1F("hData_K0y","hData_K0y",200,-100,100);
+          TH1F*          hData_K0z      = new TH1F("hData_K0z","hData_K0z",401,-200,200);
+          TH1F*          hData_K0r      = new TH1F("hData_K0r","hData_K0r",200,0,100);
+          TH1F*          hData_L0Mass   = new TH1F("hData_L0Mass","hData_L0Mass",101,1.06,1.18);
+          TH1F*          hData_L0x      = new TH1F("hData_L0x","hData_L0x",200,-100,100);
+          TH1F*          hData_L0y      = new TH1F("hData_L0y","hData_L0y",200,-100,100);
+          TH1F*          hData_L0z      = new TH1F("hData_L0z","hData_L0z",401,-200,200);
+          TH1F*          hData_L0r      = new TH1F("hData_L0r","hData_L0r",200,0,100);
 
   TH1F*          hData_Hemi_Vtx_dist_rel = new TH1F("hData_Hemi_Vtx_dist_rel","hData_Hemi_Vtx_dist_rel",50,0,100);
 
@@ -490,8 +506,156 @@ void LLTopAna::Loop(int aNN, float aTagCut, float aPtMin, float aPtMax,
   TH2F*          hBkfEff_SigEff = new TH2F("hBkfEff_SigEff","hBkfEff_SigEff",201,0,1,201,0,1);
   TH1F*          h_sig = new TH1F("h_sig","h_sig",201,-1,1);
   
-  TH2F*          hData_Veto = new TH2F("hData_Veto","hData_Veto",1001,-40,40,1001,40,40);
-     
+  TH2F*          hData_Veto = new TH2F("hData_Veto","hData_Veto",125,-3,3,125,-3,3);
+  TH2F*          hData_WoVeto = new TH2F("hData_WoVeto","hData_WoVeto",125,-3,3,125,-3,3);
+
+  //----------Vtx Selection Variables
+  TH1F*          hData_Vtx_MeanTrackWeight = new TH1F("hData_Vtx_MeanTrackWeight","hData_Vtx_MeanTrackWeight",1001,1.5,2.5);
+  TH1F*          hData_Vtx_MeanTrackWeight_Step1 = new TH1F("hData_Vtx_MeanTrackWeight_Step1 ","hData_Vtx_MeanTrackWeight_Step1 ",1001,1.5,2.5);
+  TH2F*          hData_Vts_nTrks_vs_MWT = new TH2F("hData_Vts_nTrks_vs_MWT","hData_Vts_nTrks_vs_MWT",10,0,10,10000,0,10);
+
+  TH1F*     hData_Vtx_nTrk10 = new TH1F("hData_Vtx_nTrk10","hData_Vtx_nTrk10",50,0,50);
+  TH1F*     hData_Vtx_nTrk10_Step1 = new TH1F("hData_Vtx_nTrk10_Step1","hData_Vtx_nTrk10_Step1",50,0,50);
+  TH1F*     hData_Vtx_nTrk20 = new TH1F("hData_Vtx_nTrk20","hData_Vtx_nTrk20",50,0,50);
+  TH1F*    hData_Vtx_nTrk20_Step1 = new TH1F("hData_Vtx_nTrk20_Step1","hData_Vtx_nTrk20_Step1",50,0,50);
+  
+  TH1F*     hData_Vtx_Vtx_dd = new TH1F("hData_Vtx_Vtx_dd","hData_Vtx_Vtx_dd",250,0,250);
+  TH1F*     hData_Vtx_Vtx_dd_Step1 = new TH1F("hData_Vtx_Vtx_dd_Step1","hData_Vtx_Vtx_dd_Step1",250,0,250);
+
+  TH1F*    hData_Vtx_nTrks = new TH1F("hData_Vtx_nTrks","hData_Vtx_nTrks",50,2,52);
+  TH1F*    hData_Vtx_nTrks_Step1 = new TH1F("hData_Vtx_nTrks_Step1","hData_Vtx_nTrks_Step1",50,2,52);
+//--------------------------//
+  TH1F*    hData_Vtx_nVtx = new TH1F("hData_Vtx_nVtx","hData_Vtx_nVtx",3,0,3);
+  TH1F*    hData_Vtx_nVtx_Step1 = new TH1F("hData_Vtx_nVtx_Step1","hData_Vtx_nVtx_Step1",3,0,3);
+
+  TH1F*    hData_Vtx_NChi2 = new TH1F("hData_Vtx_NChi2","hData_Vtx_NChi2",100,0,100);
+  TH1F*    hData_Vtx_NChi2_Step1 = new TH1F("hData_Vtx_NChi2_Step1","hData_Vtx_NChi2_Step1",100,0,100);
+
+  TH1F*    hData_Vtx_Step = new TH1F("hData_Vtx_Step","hData_Vtx_Step",4,0,4);
+  TH1F*    hData_Vtx_Step_Step1 = new TH1F("hData_Vtx_Step_Step1","hData_Vtx_Step_Step1",4,0,4);
+
+  TH1F*    hData_Vtx_Mass = new TH1F("hData_Vtx_Mass","hData_Vtx_Mass",280,0,14000);
+  TH1F*    hData_Vtx_Mass_Step1 = new TH1F("hData_Vtx_Mass_Step1","hData_Vtx_Mass_Step1",280,0,14000);
+
+  TH1F*    hData_Vtx_DCA = new TH1F("hData_Vtx_DCA","hData_Vtx_DCA",700,0,70);
+  TH1F*    hData_Vtx_DCA_Step1 = new TH1F("hData_Vtx_DCA_Step1","hData_Vtx_DCA_Step1",50,2,52);
+
+  //-----------EVTS selectino variables
+  TH1F*          hData_Evts_LeadingJetPt = new TH1F("hData_Evts_LeadingJetPt","hData_Evts_LeadingJetPt",100,30,1030);
+  TH1F*          hData_Evts_LeadingJet2Pt = new TH1F("hData_Evts_LeadingJet2Pt","hData_Evts_LeadingJet2Pt",100,20,1020);
+  TH1F*          hData_Evts_LeadingMuonPt = new TH1F("hData_Evts_LeadingMuonPt","hData_Evts_LeadingMuonPt",50,20,520);
+  TH1F*          hData_Evts_LeadingMuon2Pt = new TH1F("hData_Evts_LeadingMuon2Pt","hData_Evts_LeadingMuon2Pt",10,20,220);
+  TH1F*          hData_Evts_HT  = new TH1F("hData_Evts_HT","hData_Evts_HT",200,100,2100);
+  TH1F*          hData_Evts_ST  = new TH1F("hData_Evts_ST","hData_Evts_ST",50,30,530);
+  TH1F*          hData_Evts_nJets = new TH1F("hData_Evts_nJets","hData_Evts_nJets",20,0,19);
+  TH1F*          hData_Evts_nVtx = new TH1F("hData_Evts_nVtx","hData_Evts_nVtx",3,0,3);
+
+  TH1F*  hData_Evts_nMuon = new TH1F("hData_Evts_nMuon","hData_Evts_nMuon",50,0,5);
+
+  TH1F*  hData_Evts_MuondR = new TH1F("hData_Evts_MuondR","hData_Evts_MuondR",100,30,1030);
+
+  TH1F*  hData_Evts_MuondPhi = new TH1F("hData_Evts_MuondPhi","hData_Evts_MuondPhi",50,0,3.2);
+
+  TH1F*  hData_Evts_MuondEta = new TH1F("hData_Evts_MuondEta","hData_Evts_MuondEta",50,0,4);
+
+  TH1F*  hData_Evts_jet_jet_dR = new TH1F("hData_Evts_jet_jet_dR","hData_Evts_jet_jet_dR",50,0.4,5.4);
+
+  TH1F*  hData_Evts_jet_jet_dPhi = new TH1F("hData_Evts_jet_jet_dPhi","hData_Evts_jet_jet_dPhi",50,0,3.2);
+
+  TH1F*  hData_Evts_jet_jet_dEta = new TH1F("hData_Evts_jet_jet_dEta","hData_Evts_jet_jet_dEta",50,0,5);
+
+  TH1F*  hData_Evts_muon_jet_dRmin = new TH1F("hData_Evts_muon_jet_dRmin","hData_Evts_muon_jet_dRmin",50,0,5);
+
+  TH1F*  hData_Evts_muon_jet_dRmax = new TH1F("hData_Evts_muon_jet_dRmax","hData_Evts_muon_jet_dRmax",50,0,5);
+
+  //-----------------r-z plane efficiencies------------//
+  TH1F*         hSim_Hemi_LLP_r_ping    = new TH1F("hSim_Hemi_LLP_r_ping","hSim_Hemi_LLP_r_ping",100,0,100);
+  TH1F*         hSim_Hemi_LLP_eta_ping  = new TH1F("hSim_Hemi_LLP_eta_ping","hSim_Hemi_LLP_eta_ping",260,-6.5,6.5);
+  TH1F*         hSim_Hemi_LLP_r_ping_step1 = new TH1F("hSim_Hemi_LLP_r_ping_step1","hSim_Hemi_LLP_r_ping_step1",100,0,100);
+  TH1F*         hSim_Hemi_LLP_r_ping_step2 = new TH1F("hSim_Hemi_LLP_r_ping_step2","hSim_Hemi_LLP_r_ping_step2",100,0,100);
+  TH1F*         hSim_Hemi_LLP_r_ping_step3 = new TH1F("hSim_Hemi_LLP_r_ping_step3","hSim_Hemi_LLP_r_ping_step3",100,0,100);
+  TH1F*         hSim_Hemi_LLP_eta_ping_step1 = new TH1F("hSim_Hemi_LLP_eta_ping_step1","hSim_Hemi_LLP_eta_ping_step1",260,-6.5,6.5);
+  TH1F*         hSim_Hemi_LLP_eta_ping_step2 = new TH1F("hSim_Hemi_LLP_eta_ping_step2","hSim_Hemi_LLP_eta_ping_step2",260,-6.5,6.5);
+  TH1F*         hSim_Hemi_LLP_eta_ping_step3 = new TH1F("hSim_Hemi_LLP_eta_ping_step3","hSim_Hemi_LLP_eta_ping_step3",260,-6.5,6.5);
+
+  //------------resolution----------------------------//
+  TH1F*         hData_SecInt_res_r = new TH1F("hData_SecInt_res_r","hData_SecInt_res_r",100,-1,1);
+  TH1F*         hData_SecInt_res_z = new TH1F("hData_SecInt_res_z","hData_SecInt_res_z",100,-1,1);
+
+  TH1F*         hData_SecInt_res_r_inf15 = new TH1F("hData_SecInt_res_r_inf15","hData_SecInt_res_r_inf15",100,-1,1);
+  TH1F*         hData_SecInt_res_z_inf15 = new TH1F("hData_SecInt_res_z_inf15","hData_SecInt_res_z_inf15",100,-1,1);
+
+  TH1F*         hData_SecInt_res_r_sup15 = new TH1F("hData_SecInt_res_r_sup15","hData_SecInt_res_r_sup15",100,-1,1);
+  TH1F*         hData_SecInt_res_z_sup15 = new TH1F("hData_SecInt_res_z_sup15","hData_SecInt_res_z_sup15",100,-1,1);
+
+  TH1F*         hData_SecInt_res_r_inf15_step1 = new TH1F("hData_SecInt_res_r_inf15_step1","hData_SecInt_res_r_inf15_step1",50,0,3);
+  TH1F*         hData_SecInt_res_z_inf15_step1 = new TH1F("hData_SecInt_res_z_inf15_step1","hData_SecInt_res_z_inf15_step1",50,0,3);
+  TH1F*         hData_SecInt_res_r_sup15_step1 = new TH1F("hData_SecInt_res_r_sup15_step1","hData_SecInt_res_r_sup15_step1",50,0,3);
+  TH1F*         hData_SecInt_res_z_sup15_step1 = new TH1F("hData_SecInt_res_z_sup15_step1","hData_SecInt_res_z_sup15_step1",50,0,3);
+
+  TH1F*         hData_SecInt_res_r_PIXB = new TH1F("hData_SecInt_res_r_PIXB","hData_SecInt_res_r_PIXB",60,0,3);
+  TH1F*         hData_SecInt_res_r_TIB = new TH1F("hData_SecInt_res_r_TIB","hData_SecInt_res_r_TIB",60,0,3);
+  TH1F*         hData_SecInt_res_r_TOB = new TH1F("hData_SecInt_res_r_TOB","hData_SecInt_res_r_TOB",60,0,3);
+
+  TH1F*         hData_SecInt_res_z_PIXB = new TH1F("hData_SecInt_res_z_PIXB","hData_SecInt_res_z_PIXB",60,0,3);
+  TH1F*         hData_SecInt_res_z_TIB = new TH1F("hData_SecInt_res_z_TIB","hData_SecInt_res_z_TIB",60,0,3);
+  TH1F*         hData_SecInt_res_z_TOB = new TH1F("hData_SecInt_res_z_TOB","hData_SecInt_res_z_TOB",60,0,3);
+
+  TH1F*         hData_SecInt_res_r_PIXF = new TH1F("hData_SecInt_res_r_PIXF","hData_SecInt_res_r_PIXF",60,0,3);
+  TH1F*         hData_SecInt_res_r_TID = new TH1F("hData_SecInt_res_r_TID","hData_SecInt_res_r_TID",60,0,3);
+  TH1F*         hData_SecInt_res_r_TEC = new TH1F("hData_SecInt_res_r_TEC","hData_SecInt_res_r_TEC",60,0,3);
+
+  TH1F*         hData_SecInt_res_z_PIXF = new TH1F("hData_SecInt_res_z_PIXF","hData_SecInt_res_z_PIXF",60,0,3);
+  TH1F*         hData_SecInt_res_z_TID = new TH1F("hData_SecInt_res_z_TID","hData_SecInt_res_z_TID",60,0,3);
+  TH1F*         hData_SecInt_res_z_TEC = new TH1F("hData_SecInt_res_z_TEC","hData_SecInt_res_z_TEC",60,0,3);
+
+
+  TH1F*       hData_Hemi_Vtx_r = new TH1F("hData_Hemi_Vtx_r","hData_Hemi_Vtx_r",20,0,100);
+  TH1F*       hData_Hemi_Vtx_eta = new TH1F("hData_Hemi_Vtx_eta","hData_Hemi_Vtx_eta",260,-6.5,6.5);
+   TH1F*      hData_Hemi_Vtx_dist  = new TH1F("hData_Hemi_Vtx_dist","hData_Hemi_Vtx_dist",20,0.,100.);
+ 
+  TH1F*       hData_Hemi_Vtx_r_step1 = new TH1F("hData_Hemi_Vtx_r_step1","hData_Hemi_Vtx_r_step1",20,0,100);
+  TH1F*       hData_Hemi_Vtx_eta_step1 = new TH1F("hData_Hemi_Vtx_eta_step1","hData_Hemi_Vtx_eta_step1",260,-6.5,6.5);
+   TH1F*      hData_Hemi_Vtx_dist_step1  = new TH1F("hData_Hemi_Vtx_dist_step1","hData_Hemi_Vtx_dist_step1",20,0.,100.);
+
+
+  TH1F*        hData_Hemi_Vtx_r_chiok = new TH1F("hData_Hemi_Vtx_r_chiok","hData_Hemi_Vtx_r_chiok",20,0,100);
+  TH1F*        hData_Hemi_Vtx_eta_chiok = new TH1F("hData_Hemi_Vtx_eta_chiok","hData_Hemi_Vtx_eta_chiok",260,-6.5,6.5);
+  TH1F*        hData_Hemi_Vtx_dist_chiok = new TH1F("hData_Hemi_Vtx_dist_chiok","hData_Hemi_Vtx_dist_chiok",20,0.,100.);
+
+   TH1F*      hData_Hemi_Vtx_r_chiok_step1 = new TH1F("hData_Hemi_Vtx_r_chiok_step1","hData_Hemi_Vtx_r_chiok_step1",20,0,100);
+   TH1F*      hData_Hemi_Vtx_eta_chiok_step1 = new TH1F("hData_Hemi_Vtx_eta_chiok_step1","hData_Hemi_Vtx_eta_chiok_step1",260,-6.5,6.5);
+   TH1F*      hData_Hemi_Vtx_dist_chiok_step1 = new TH1F("hData_Hemi_Vtx_dist_chiok_step1","hData_Hemi_Vtx_dist_chiok_step1",20,0.,100.);
+
+  TH1F*       hData_Hemi_Vtx_r_ping = new TH1F("hData_Hemi_Vtx_r_ping","hData_Hemi_Vtx_r_ping",20,0,100);
+  TH1F*       hData_Hemi_Vtx_eta_ping = new TH1F("hData_Hemi_Vtx_eta_ping","hData_Hemi_Vtx_eta_ping",260,-6.5,6.5);
+  TH1F*       hData_Hemi_Vtx_dist_ping = new TH1F("hData_Hemi_Vtx_dist_ping","hData_Hemi_Vtx_dist_ping",20,0.,100.);
+
+   TH1F*      hData_Hemi_Vtx_r_ping_step1 = new TH1F("hData_Hemi_Vtx_r_ping_step1","hData_Hemi_Vtx_r_ping_step1",20,0,100);
+   TH1F*      hData_Hemi_Vtx_eta_ping_step1 = new TH1F("hData_Hemi_Vtx_eta_ping_step1","hData_Hemi_Vtx_eta_ping_step1",260,-6.5,6.5);
+  TH1F*       hData_Hemi_Vtx_dist_ping_step1 = new TH1F("hData_Hemi_Vtx_dist_ping_step1","hData_Hemi_Vtx_dist_ping_step1",20,0.,100.);
+
+/////////////
+  TH1F*  hGen_dRneuneu = new TH1F("hGen_dRneuneu","hGen_dRneuneu",201,0,6);
+  TH1F*  hGen_dPhineuneu = new TH1F("hGen_dPhineuneu","hGen_dPhineuneu",201,0,6);
+  TH1F*  hGen_dEtaneuneu = new TH1F("hGen_dEtaneuneu","hGen_dEtaneuneu",201,0,6);
+
+  TH1F*    hGen_Jet_pt = new TH1F("hGen_Jet_pt","hGen_Jet_pt",100,0,1000);
+  TH1F*    hGen_leadingjet_pt = new TH1F("hGen_leadingjet_pt","hGen_leadingjet_pt",100,0,1000);
+  TH1F*    hGen_subleadingjet_pt = new TH1F("hGen_subleadingjet_pt","hGen_subleadingjet_pt",100,0,1000);
+
+  TH1F*    hData_Jet_pt = new TH1F("hData_Jet_pt","hData_Jet_pt",100,0,1000);
+  TH1F*    hData_leadingjet_pt = new TH1F("hData_leadingjet_pt","hData_leadingjet_pt",100,0,1000);
+  TH1F*    hData_subleadingjet_pt = new TH1F("hData_subleadingjet_pt","hData_subleadingjet_pt",100,0,1000);
+
+  TH1F*    hGen_Muon_pt = new TH1F("hGen_Muon_pt","hGen_Muon_pt",100,0,1000);
+  TH1F*    hGen_leadingmuon_pt = new TH1F("hGen_leadingmuon_pt","hGen_leadingmuon_pt",100,0,1000);
+  TH1F*    hGen_subleadingmuon_pt = new TH1F("hGen_subleadingmuon_pt","hGen_subleadingmuon_pt",100,0,1000);
+
+  TH1F*    hData_Muon_pt = new TH1F("hData_Muon_pt","hData_Muon_pt",100,0,1000);
+  TH1F*    hData_leadingmuon_pt = new TH1F("hData_leadingmuon_pt","hData_leadingmuon_pt",100,0,1000);
+  TH1F*    hData_subleadingmuon_pt = new TH1F("hData_subleadingmuon_pt","hData_subleadingmuon_pt",100,0,1000);
+
 ///////////////////////////////////////////////////////////////////
    if (fChain == 0) return;
 int tracks =0;
@@ -505,6 +669,225 @@ int allevents = 0;
 float nSelecTracks[200] = {0};
 float nDiscardTracks[200] =  {0};
 float sig[200] = {0};
+float nRecoVertex = 0;
+float MeanDistance = 0;
+float nRecoVertexStep1 = 0;
+float MeanDistanceStep1 = 0;
+float nRecoVertexStep2 = 0;
+float MeanDistanceStep2 = 0;
+float nRecoVertexStep3 = 0;
+float MeanDistanceStep3 = 0;
+float nRecoVertexPing = 0;
+float MeanDistancePing = 0;
+float nRecoVertexStep1Ping = 0;
+float MeanDistanceStep1Ping = 0;
+float nRecoVertexStep2Ping = 0;
+float MeanDistanceStep2Ping = 0;
+float nRecoVertexStep3Ping = 0;
+float MeanDistanceStep3Ping = 0;
+float TotalnVertex = 0;
+float nEvts = 0;
+float nRecoVertexMTW2= 0 ;
+float nRecoVertexStep1MTW2 = 0;
+float nRecoVertexStep2MTW2 = 0;
+float nRecoVertexStep3MTW2 = 0;
+float nRecoVertexMTW2Ping = 0 ;
+float nRecoVertexStep1MTW2Ping=0;
+float nRecoVertexStep2MTW2Ping=0;
+float nRecoVertexStep3MTW2Ping=0;
+
+
+float nTrks085 = 0;
+float nTrks0 = 0;
+
+
+//-------------Signal/bkg----------//
+bool Signal = true;
+//------------------------------//
+
+
+
+//--------VtxSelection Variables-------
+int nvert = 0;
+int nvertStep1 = 0;
+float MeanTWcut = 1.5;
+float dTW = 0.001;
+int nSteps = 1/dTW;
+float nSelecVtx[1000] = {0};
+float nSelecVtxStep1[1000] = {0};
+//--------ntrk10------
+int ntrk10Cut = 0;
+int dntrk10 = 1;
+int nStep_10 = (50-ntrk10Cut)/dntrk10;
+float nEvts_ntrk10[50] = {0};
+float nEvts_ntrk10_step1[50] = {0};
+//-----------------------------
+//--------ntrk20------
+int ntrk20Cut = 0;
+int dntrk20 = 1;
+int nStep_20 = (50-ntrk20Cut)/dntrk20;
+float nEvts_ntrk20[50] = {0};
+float nEvts_ntrk20_step1[50] = {0};
+//-----------------------------
+//--------Vtx_dd------
+int VtxddCut = 0;
+int ddd = 1;
+int nStep_dd = (250-VtxddCut)/ddd;
+float nEvts_Vtx_dd[250] = {0};
+float nEvts_Vtx_dd_step1[250] = {0};
+//-----------------------------
+//--------Vtx_nTrks------
+int VtxnTrksCut = 2;
+int dnTrks = 1;
+int nStep_nTrks = (52-VtxddCut)/dnTrks;
+float nEvts_Vtx_nTrks[50] = {0};
+float nEvts_Vtx_nTrks_step1[50] = {0};
+//-----------------------------
+//--------Vtx_nVtx------
+int VtxnVtxCut = 0;
+int dnVtx = 1;
+int nStep_nVtx = (3-VtxnVtxCut)/dnVtx;
+float nEvts_Vtx_nVtx[3] = {0};
+float nEvts_Vtx_nVtx_step1[3] = {0};
+//-----------------------------------------------
+
+//--------Vtx_Chi2------
+int VtxChi2Cut = 0;
+float dChi2 = 0.1;
+int nStep_Chi2 = (10-VtxChi2Cut)/dChi2;
+float nEvts_Vtx_Chi2[100] = {0};
+float nEvts_Vtx_Chi2_step1[100] = {0};
+//-----------------------------------------------
+
+//--------Vtx_Step------
+int VtxStepCut = 0;
+int dStep = 1;
+int nStep_Step = (4-VtxStepCut)/dStep;
+float nEvts_Vtx_Step[4] = {0};
+float nEvts_Vtx_Step_step1[4] = {0};
+//-----------------------------------------------
+
+//--------Vtx_InvMass------
+int VtxMassCut = 0;
+int dMass = 50;
+int nStep_Mass = (14000-VtxMassCut)/dMass;
+float nEvts_Vtx_Mass[280] = {0};
+float nEvts_Vtx_Mass_step1[280] = {0};
+//-----------------------------------------------
+
+//--------Vtx_DCA tracks------
+int VtxDCACut = 0;
+float dDCA = 0.1;
+int nStep_DCA = (70-VtxDCACut)/dDCA;
+float nEvts_Vtx_DCA[700] = {0};
+float nEvts_Vtx_DCA_step1[700] = {0};
+//-----------------------------------------------
+
+//--------------------EvtsSelection Varaibles----
+//--------Leadingjet pt------
+int JetPTCut = 20;
+int dpt = 10;
+int nStep_jet_pt = (1020-JetPTCut)/dpt;//1000-20/dpt
+float nEvts_jetpt[100] = {0};
+//---------------------------
+//--------subLeadingjet pt------
+int Jet2PTCut = 20;
+int dpt2 = 10;
+int nStep_jet2_pt = (1020-Jet2PTCut)/dpt2;//1000-20/dpt
+float nEvts_jetpt2[100] = {0};
+//---------------------------
+//--------Leadingmuon pt------
+int MuonPTCut = 20;
+int dpt_muon = 10;
+int nStep_muon_pt = (520-MuonPTCut)/dpt_muon;//1000-20/dpt
+float nEvts_muonpt[50] = {0};
+//---------------------------
+//--------subLeading muon pt------
+int Muon2PTCut = 20;
+int dpt_muon2 = 10;
+int nStep_muon2_pt = (220-Muon2PTCut)/dpt_muon2;//1000-20/dpt
+float nEvts_muon2pt[20] = {0};
+//---------------------------
+//--------HT------
+int HTCut = 100;
+int dpt_HT = 10;
+int nStep_HT_pt = (2100-HTCut)/dpt_HT;//1000-20/dpt
+float nEvts_HT[200] = {0};
+//---------------------------
+//--------ST------
+int STCut = 30;
+int dpt_ST = 10;
+int nStep_ST_pt = (530-STCut)/dpt_ST;//1000-20/dpt
+float nEvts_ST[50] = {0};
+//---------------------------
+//--------nJet------
+int nJetCut = 0;
+int dnJet_ST = 1;
+int nStep_nJet = (20-nJetCut)/dnJet_ST;//1000-20/dpt
+float nEvts_nJet[20] = {0};
+
+//-------------nmu----------//
+int nMuonCut = 0;
+int dnMuon = 1;
+int nStep_nMuon = (20-nMuonCut)/dnMuon;//1000-20/dpt
+float nEvts_nMuon[20] = {0};
+// //------------------------------
+
+// //-------------muon_muon_dR----------//
+int MuondRCut = 0;
+float dMuondR = 0.01;
+int nStep_MuondR = (5-MuondRCut)/dMuondR;//1000-20/dpt
+float nEvts_MuondR[50] = {0};
+// //------------------------------
+
+// //-------------muon_muon_dPhi----------//
+int MuondPhiCut = 0;
+float dMuondPhi = 0.064;
+int nStep_MuondPhi = (3.2-MuondPhiCut)/dMuondPhi;//1000-20/dpt
+float nEvts_MuondPhi[50] = {0};
+// //------------------------------
+
+// //-------------muon_muon_dEta----------//
+int MuondEtaCut = 0;
+float dMuondEta = 0.08;
+int nStep_MuondEta = (4-MuondEtaCut)/dMuondEta;//1000-20/dpt
+float nEvts_MuondEta[50] = {0};
+// //------------------------------
+
+// //-------------jet_jet_dR----------//
+int JetdRCut = 0.4;
+float dJetdR = 0.1;
+int nStep_JetdR = (5.4-JetdRCut)/dJetdR;//1000-20/dpt
+float nEvts_JetdR[50] = {0};
+// //------------------------------
+
+// //-------------jet_jet_dPhi----------//
+int JetdPhiCut = 0;
+float dJetdPhi = 0.064;
+int nStep_JetdPhi = (3.2-JetdPhiCut)/dJetdPhi;//1000-20/dpt
+float nEvts_JetdPhi[50] = {0};
+// //------------------------------
+
+// //-------------jet_jet_dEta----------//
+int JetdEtaCut = 0;
+float dJetdEta = 0.1;
+int nStep_JetdEta = (5-JetdEtaCut)/dJetdEta;//1000-20/dpt
+float nEvts_JetdEta[50] = {0};
+// //------------------------------
+
+// //-------------muon_jet_dRmin----------//
+int MuonJetdRminCut = 0;
+float dMuonJetdRmin = 0.1;
+int nStep_MuonJetdRmin = (5-MuonJetdRminCut)/dMuonJetdRmin;//1000-20/dpt
+float nEvts_MuonJetdRmin[50] = {0};
+// //------------------------------
+// //-------------muon_jet_dRmax----------//
+int MuonJetdRCutmax = 0;
+float dMuonJetdRmax = 0.12;
+int nStep_MuonMuonJetdRmax = (6-MuonJetdRCutmax)/dMuonJetdRmax;//1000-20/dpt
+float nEvts_MuonJetdRmax[50] = {0};
+//------------------------------
+
 
     Long64_t nentries = fChain->GetEntriesFast();
      std::cout << "Total Entries : " << nentries << std::endl;
@@ -584,22 +967,29 @@ if (tree_Filter)
 // reco muons
 
    int nmu =  tree_muon_pt->size();
-   hDataAll_nMu->Fill( nmu );
+   
    int nmuglob = 0;
+   int NMU = 0;
    float muptmax = 0.;
    TLorentzVector vmuon[2];
 
-   for (int i=0; i<nmu; i++) {	     // Loop on reco muons
-   if ( !tree_muon_isGlobal->at(i) ) continue;
-     float mupt1  = tree_muon_pt->at(i);
-   if ( mupt1 < 10. ) continue;
-     if ( mupt1 > muptmax ) muptmax = mupt1;
-     nmuglob++;
+   for (int i=0; i<nmu; i++) 
+    {	     // Loop on reco muons
+      if ( !tree_muon_isGlobal->at(i) ) continue;
+      float mupt1  = tree_muon_pt->at(i);
+      if ( mupt1 < 10. ) continue;
+      if ( mupt1 > muptmax ) muptmax = mupt1;
+      nmuglob++;
+      //  NMU += tree_muon_nmu->at(i);x
+      if ( tree_muon_pt->at(i) < 3. ) continue;
+      if ( abs(tree_muon_eta->at(i)) > 2.5 ) continue;  // muon acceptance
+      NMU++;
    }	   // end loop on reco muons
 
    hDataAll_nMuGlob->Fill( nmuglob );
    hDataAll_Mu_ptmax->Fill( muptmax );
    if ( muptmax > 25. ) hDataAll_nMuGlob_ptGT28->Fill( nmuglob );
+hDataAll_nMu->Fill( NMU );
 
 //$$
 //  if ( muptmax < 25. || nmuglob < 2 ) continue;  // used in HTFilter ! 
@@ -708,7 +1098,6 @@ if (tree_Filter)
    hDataGen_PV_dx->Fill( PVx - GenPVx );
    hDataGen_PV_dy->Fill( PVy - GenPVy );
    hDataGen_PV_dz->Fill( PVz - GenPVz );
-
 
 ///////////////////////
 // GenParticle
@@ -1963,16 +2352,67 @@ if ( hit <= 10 ) {
 // Hemisphere study
 
    for (unsigned int i=0; i<tree_Hemi->size(); i++) {
-    //  float Hemi_LLP_dist  = tree_Hemi_LLP_dist->at(i);//to change when ttbar
-    //  bool  Hemi_LLP_ping  = tree_Hemi_LLP_ping->at(i);//to change when ttbar
-         float Hemi_LLP_dist  = 0;//when MC Signal
-     bool  Hemi_LLP_ping  = 0;//when MC Signal
-    
-
+              float Hemi_LLP_dist  = 0;//when MC Signal
+          bool  Hemi_LLP_ping  = 0;//when MC Signal
+          // float  Hemi_Vtx_eta = 0 ;
+    if(Signal)
+        {
+          Hemi_LLP_dist  = tree_Hemi_LLP_dist->at(i);//to change when ttbar
+          Hemi_LLP_ping  = tree_Hemi_LLP_ping->at(i);//to change when ttbar
+          
+        }
+     //Allez Paul bouge toi le cul
+     float Hemi_Vtx_r     = tree_Hemi_Vtx_r->at(i);
+     float Hemi_Vtx_eta     = tree_Hemi_Vtx_eta->at(i);
      float Hemi_Vtx_NChi2 = tree_Hemi_Vtx_NChi2->at(i);
      int   Hemi_Vtx_step  = tree_Hemi_Vtx_step->at(i);
+     int   Hemi_Vtx_dist  = tree_Hemi_Vtx_dist->at(i);
      hData_Hemi_Vtx_NChi2_all->Fill( Hemi_Vtx_NChi2 );
+     hData_Hemi_Vtx_r->Fill(Hemi_Vtx_r);
+     hData_Hemi_Vtx_eta->Fill(Hemi_Vtx_eta);
+     hData_Hemi_Vtx_dist->Fill(Hemi_Vtx_dist);
+     if(Hemi_Vtx_step==1)
+      {
+        hData_Hemi_Vtx_r_step1->Fill(Hemi_Vtx_r) ;
+        hData_Hemi_Vtx_eta_step1->Fill(Hemi_Vtx_eta) ;
+        hData_Hemi_Vtx_dist_step1->Fill(Hemi_Vtx_dist);
+      }
+    if(Hemi_Vtx_NChi2>0 && Hemi_Vtx_NChi2<10)
+      {
+          hData_Hemi_Vtx_r_chiok->Fill(Hemi_Vtx_r);
+          hData_Hemi_Vtx_eta_chiok->Fill(Hemi_Vtx_eta);
+          hData_Hemi_Vtx_dist_chiok->Fill(Hemi_Vtx_dist);
+
+          if (Hemi_Vtx_step==1)
+            {
+              hData_Hemi_Vtx_r_chiok_step1->Fill(Hemi_Vtx_r);
+              hData_Hemi_Vtx_eta_chiok_step1->Fill(Hemi_Vtx_eta);
+              hData_Hemi_Vtx_dist_chiok_step1->Fill(Hemi_Vtx_dist);
+            }
+
+          if (Signal)
+            {
+              if(tree_Hemi_LLP_ping->at(i))
+              {
+                hData_Hemi_Vtx_r_ping->Fill(Hemi_Vtx_r);
+                hData_Hemi_Vtx_eta_ping->Fill(Hemi_Vtx_eta);
+                hData_Hemi_Vtx_dist_ping->Fill(Hemi_Vtx_dist);
+                if (Hemi_Vtx_step==1)
+                  {
+                    hData_Hemi_Vtx_r_ping_step1->Fill(Hemi_Vtx_r);
+                    hData_Hemi_Vtx_eta_ping_step1->Fill(Hemi_Vtx_eta);
+                    hData_Hemi_Vtx_dist_ping_step1->Fill(Hemi_Vtx_dist);
+                  }
+              }
+            }
+
+      }
+
+
+
      hSim_Hemi_LLP_dist->Fill( Hemi_LLP_dist );
+ 
+
      if ( Hemi_Vtx_NChi2 != -10 ) {
        hData_Hemi_Vtx_NChi2->Fill( Hemi_Vtx_NChi2 );
        hSim_Hemi_LLP_dist_chiOK->Fill( Hemi_LLP_dist );
@@ -1989,11 +2429,13 @@ if ( hit <= 10 ) {
        if ( Hemi_Vtx_step == 3 ) hData_Hemi_Vtx_dist_step3->Fill( tree_Hemi_Vtx_dist->at(i) );
        hData_Hemi_Vtx_dist->Fill( tree_Hemi_Vtx_dist->at(i) );
   
-      //  hSim_Hemi_Vtx_dx->Fill( tree_Hemi_Vtx_dx->at(i) );//to change when ttbar
-      //  hSim_Hemi_Vtx_dy->Fill( tree_Hemi_Vtx_dy->at(i) );//to change when ttbar
-      //  hSim_Hemi_Vtx_dz->Fill( tree_Hemi_Vtx_dz->at(i) );//to change when ttbar
-      //  hSim_Hemi_Vtx_dd->Fill( tree_Hemi_Vtx_dd->at(i) );//to change when ttbar
-
+          if(Signal)
+        {
+        hSim_Hemi_Vtx_dx->Fill( tree_Hemi_Vtx_dx->at(i) );//to change when ttbar
+       hSim_Hemi_Vtx_dy->Fill( tree_Hemi_Vtx_dy->at(i) );//to change when ttbar
+        hSim_Hemi_Vtx_dz->Fill( tree_Hemi_Vtx_dz->at(i) );//to change when ttbar
+        hSim_Hemi_Vtx_dd->Fill( tree_Hemi_Vtx_dd->at(i) );//to change when ttbar
+        }
       //  if (tree_Hemi_Vtx_dd->at(i)<0.1)
       //   {
       //     hData_Hemi_Vtx_dist_rel->Fill(tree_Hemi_Vtx_dist->at(i));
@@ -2002,21 +2444,28 @@ if ( hit <= 10 ) {
 
      if ( Hemi_Vtx_NChi2 > 0 && Hemi_Vtx_NChi2 < 10 && Hemi_LLP_ping ) {
        hSim_Hemi_LLP_dist_ping->Fill( Hemi_LLP_dist );
-       if ( Hemi_Vtx_step == 1 ) hSim_Hemi_LLP_dist_ping_step1->Fill( Hemi_LLP_dist );
-       if ( Hemi_Vtx_step == 2 ) hSim_Hemi_LLP_dist_ping_step2->Fill( Hemi_LLP_dist );
-       if ( Hemi_Vtx_step == 3 ) hSim_Hemi_LLP_dist_ping_step3->Fill( Hemi_LLP_dist );
+       hSim_Hemi_LLP_r_ping->Fill(Hemi_Vtx_r);
+       hSim_Hemi_LLP_eta_ping->Fill(Hemi_Vtx_eta);
+       if ( Hemi_Vtx_step == 1 ) {hSim_Hemi_LLP_dist_ping_step1->Fill( Hemi_LLP_dist );hSim_Hemi_LLP_r_ping_step1->Fill(Hemi_Vtx_r);hSim_Hemi_LLP_eta_ping_step1->Fill(Hemi_Vtx_eta);}
+       if ( Hemi_Vtx_step == 2 ) {hSim_Hemi_LLP_dist_ping_step2->Fill( Hemi_LLP_dist );hSim_Hemi_LLP_r_ping_step2->Fill(Hemi_Vtx_r);hSim_Hemi_LLP_eta_ping_step2->Fill(Hemi_Vtx_eta);}
+       if ( Hemi_Vtx_step == 3 ) {hSim_Hemi_LLP_dist_ping_step3->Fill( Hemi_LLP_dist );hSim_Hemi_LLP_r_ping_step3->Fill(Hemi_Vtx_r);hSim_Hemi_LLP_eta_ping_step3->Fill(Hemi_Vtx_eta);}
      }
    }
 
    //Signal Vertex
       for (unsigned int i = 0 ; i< tree_Hemi_Vtx_NChi2->size(); i++)
         {
-          if(abs(tree_Hemi_Vtx_NChi2->at(i)) < 10. && tree_Hemi_nTrks->at(i)>1)
+          if(abs(tree_Hemi_Vtx_NChi2->at(i)) < 10. && tree_Hemi_nTrks->at(i)>1 &&  tree_Hemi_Vtx_NChi2->at(i)>0)
             {
               nVertex++;
               hData_Hemi_Vtx_r->Fill(sqrt(tree_Hemi_Vtx_x->at(i)*tree_Hemi_Vtx_x->at(i)+tree_Hemi_Vtx_y->at(i)*tree_Hemi_Vtx_y->at(i)));
               hData_Hemi_Vtx_z->Fill(tree_Hemi_Vtx_z->at(i));
               hData_Hemi_Vtx_rvsz->Fill(tree_Hemi_Vtx_z->at(i),sqrt(tree_Hemi_Vtx_x->at(i)*tree_Hemi_Vtx_x->at(i)+tree_Hemi_Vtx_y->at(i)*tree_Hemi_Vtx_y->at(i)));
+              if (tree_Hemi_Vtx_r->at(i)<25)  
+                {
+                  hData_Hemi_Vtx_xvsy->Fill(tree_Hemi_Vtx_x->at(i),tree_Hemi_Vtx_y->at(i));
+                }
+              
             }
         }
 
@@ -2041,9 +2490,13 @@ if ( hit <= 10 ) {
     for (unsigned int j = 0 ; j< tree_Hemi_dR->size();j++)
       {
         hData_dR_GenReco->Fill(tree_Hemi_dR->at(j));
-        // hData_dR_GenGen->Fill(tree_Hemi_LLP_dR12->at(j));////to change when ttbar
         hData_dR_RecoReco->Fill(tree_Hemi_dR12->at(j));
-        // hGenReco_dR->Fill(tree_Hemi_LLP_dR12->at(j),tree_Hemi_dR12->at(j));//to change when ttbar
+            if(Signal)
+        {
+             hData_dR_GenGen->Fill(tree_Hemi_LLP_dR12->at(j));////
+             hGenReco_dR->Fill(tree_Hemi_LLP_dR12->at(j),tree_Hemi_dR12->at(j));//
+        }
+
       }
 
 //Photon COnversion
@@ -2058,7 +2511,7 @@ if ( hit <= 10 ) {
 //Secodary Interaction
     for (unsigned int j = 0 ; j< tree_SecInt_x->size();j++)
       {
-        if(abs(tree_SecInt_eta->at(j))<1.5&&tree_SecInt_r->at(j)<20&& tree_SecInt_selec->at(j))
+        if(abs(tree_SecInt_eta->at(j))<1&&tree_SecInt_r->at(j)<20&& tree_SecInt_selec->at(j))
           {
             hData_SecInt_xy->Fill(tree_SecInt_x->at(j),tree_SecInt_y->at(j));
           }
@@ -2069,13 +2522,41 @@ if ( hit <= 10 ) {
       {
         if(tree_V0_reco_source->at(j)==1)
           {
-            hData_K0Mass->Fill(tree_V0_reco_mass->at(j));
+            hData_reco_K0Mass->Fill(tree_V0_reco_mass->at(j));
           }
         else if(tree_V0_reco_source->at(j)==2)
           {
-            hData_L0Mass->Fill(tree_V0_reco_mass->at(j));
+            hData_reco_L0Mass->Fill(tree_V0_reco_mass->at(j));
           }
+        
+         hData_reco_V0xy->Fill(tree_V0_reco_x->at(j),tree_V0_reco_y->at(j));
       }
+
+    for (unsigned int j = 0 ; j< tree_K0_mass->size();j++)
+      {
+          if (tree_K0_pt->at(j)>1)
+            {
+              hData_K0Mass->Fill(tree_K0_mass->at(j));
+              hData_K0x->Fill(tree_K0_x->at(j));
+              hData_K0y->Fill(tree_K0_y->at(j));
+              hData_K0z->Fill(tree_K0_z->at(j));
+              hData_K0r->Fill(tree_K0_r->at(j));
+            }
+
+      }
+    for (unsigned int j = 0 ; j< tree_L0_mass->size();j++)
+      {
+          if (tree_L0_pt->at(j)>1)
+            {
+              hData_L0Mass->Fill(tree_L0_mass->at(j));
+              hData_L0x->Fill(tree_L0_x->at(j));
+              hData_L0y->Fill(tree_L0_y->at(j));
+              hData_L0z->Fill(tree_L0_z->at(j));
+              hData_L0r->Fill(tree_L0_r->at(j));
+            }
+      }
+  // }
+
       //-------------------------------------------------------//
       // MVA Output
           for (unsigned int j = 0 ; j< tree_track_MVAval->size();j++)
@@ -2119,6 +2600,7 @@ if ( hit <= 10 ) {
               nDiscardTracks[i]++;
               nDiscardTrack++;
             }
+          // std::cout<<"tk pt : "<<tree_track_pt->at(j)<<" tk _eta : "<<tree_track_eta->at(j)<<" tk_phi :"<<tree_track_phi->at(j)<<" bdt_val :"<<tree_track_MVAval->at(j)<<std::endl;
       }
 
       float SignalEff = 0.;
@@ -2144,20 +2626,694 @@ if ( hit <= 10 ) {
 
 for (unsigned int i=0;i<tree_SecInt_x->size();i++)
   {
-    if(tree_SecInt_selec->at(i)&&tree_SecInt_layer->at(i)!=0 && abs(tree_SecInt_x->at(i))<25 && abs(tree_SecInt_y->at(i))<25)
+    if(tree_SecInt_selec->at(i)&&tree_SecInt_layer->at(i)!=0 && abs(tree_SecInt_x->at(i))<25 && abs(tree_SecInt_y->at(i))<25 && abs(tree_SecInt_eta->at(i))<1.4 && abs(tree_SecInt_z->at(i))<27)
       {
         hData_Veto->Fill(tree_SecInt_x->at(i),tree_SecInt_y->at(i));
       }
+    if (tree_SecInt_selec->at(i) && abs(tree_SecInt_x->at(i))<25 && abs(tree_SecInt_y->at(i))<25 && abs(tree_SecInt_eta->at(i))<1.4&&abs(tree_SecInt_z->at(i))<27)
+      {
+        hData_WoVeto->Fill(tree_SecInt_x->at(i),tree_SecInt_y->at(i));
+      }
   }
+for (unsigned int k=0 ; k < tree_Hemi->size(); k++)
+  {
+    TotalnVertex++;
+  }
+
+
+
+
+  
+    //  Reco Vrtex efficiency pour MC signal
+    if(Signal)
+      {
+        for (unsigned int j = 0 ; j < tree_Hemi_Vtx_NChi2->size(); j ++)
+          {
+             if ( tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 )
+         {
+            nRecoVertex++;
+            MeanDistance += tree_Hemi_Vtx_dist->at(j);
+            if (tree_Hemi_LLP_ping->at(j))
+              {
+                nRecoVertexPing++;
+                MeanDistancePing += tree_Hemi_Vtx_dist->at(j);
+                if (tree_Hemi_Vtx_step->at(j)==1)
+                  {
+                    nRecoVertexStep1Ping++;
+                    MeanDistanceStep1Ping += tree_Hemi_Vtx_dist->at(j);
+                  }
+                if (tree_Hemi_Vtx_step->at(j)==2)
+                  {
+                    nRecoVertexStep2Ping++;
+                    MeanDistanceStep2Ping += tree_Hemi_Vtx_dist->at(j);
+                  }
+                if (tree_Hemi_Vtx_step->at(j)==3)
+                  {
+                    nRecoVertexStep3Ping++;
+                    MeanDistanceStep3Ping += tree_Hemi_Vtx_dist->at(j);
+                  }
+              }
+
+            if (tree_Hemi_Vtx_step->at(j)==1)
+              {
+                nRecoVertexStep1++;
+                MeanDistanceStep1 += tree_Hemi_Vtx_dist->at(j);
+              }
+            if (tree_Hemi_Vtx_step->at(j)==2)
+              {
+                nRecoVertexStep2++;
+                MeanDistanceStep2 += tree_Hemi_Vtx_dist->at(j);
+              }
+            if (tree_Hemi_Vtx_step->at(j)==3)
+              {
+                nRecoVertexStep3++;
+                MeanDistanceStep3 += tree_Hemi_Vtx_dist->at(j);
+              }
+          }
+        }
+      }
+    else
+      {
+          // Reco Vrtex efficiency pour TTbar
+for (unsigned int j = 0 ; j < tree_Hemi_Vtx_NChi2->size(); j ++)
+   {
+      if ( tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 )
+         {
+            nRecoVertex++;
+            MeanDistance += tree_Hemi_Vtx_dist->at(j);
+            if (tree_Hemi_Vtx_step->at(j)==1)
+              {
+                nRecoVertexStep1++;
+                MeanDistanceStep1 += tree_Hemi_Vtx_dist->at(j);
+              }
+            if (tree_Hemi_Vtx_step->at(j)==2)
+              {
+                nRecoVertexStep2++;
+                MeanDistanceStep2 += tree_Hemi_Vtx_dist->at(j);
+              }
+            if (tree_Hemi_Vtx_step->at(j)==3)
+              {
+                nRecoVertexStep3++;
+                MeanDistanceStep3 += tree_Hemi_Vtx_dist->at(j);
+              }
+         }
+   }
+      }
 
     std::cout << "number of events  "<< allevents << std::endl; 
 //  std::cout << "number of tracks  "<< nRecoTracks << std::endl; 
 //  std::cout << "number of jets    "<< nJets << std::endl; 
-   }
- } // end loop on events 
 
-     std::cout<<"nStracks : "<<nSTracks<<std::endl;
-    std::cout<<"nDTracks : "<<nDTracks<<std::endl;
+//---------------Vtx Selection Variables----------------//
+  //------------------MWT CUT -------------------//
+  for (int i =0 ;i<nSteps+1;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_MeantrackWeight->at(j)>(MeanTWcut+i*dTW) )
+            {
+              nSelecVtx[i]++;
+              
+              if (tree_Hemi_Vtx_step->at(j)==1)
+                {
+                  nSelecVtxStep1[i]++;
+                }
+            }
+        }
+
+    for (unsigned int i = 0 ; i < tree_Hemi_Vtx_NChi2->size(); i++)
+      {
+        if (tree_Hemi_Vtx_NChi2->at(i)>0 && tree_Hemi_Vtx_NChi2->at(i)<10)
+          {
+            hData_Vts_nTrks_vs_MWT->Fill(tree_Hemi_Vtx_nTrks->at(i),tree_Hemi_Vtx_MeantrackWeight->at(i));
+          }
+      }
+    //-----------------------------------//
+    }
+
+    for (unsigned int j = 0 ; j < tree_Hemi_Vtx_NChi2->size(); j++)
+      {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_MeantrackWeight->at(j)>=2 )
+            {
+              nRecoVertexMTW2++;
+              if (Signal){
+                if (tree_Hemi_LLP_ping->at(j))
+                    {
+                      nRecoVertexMTW2Ping++;
+                    }
+              }
+             
+              if (tree_Hemi_Vtx_step->at(j)==1)
+                {
+                  nRecoVertexStep1MTW2++;
+                  if(Signal)
+                    {
+                  if (tree_Hemi_LLP_ping->at(j))
+                    {
+                      nRecoVertexStep1MTW2Ping++;
+                    }
+                    }
+
+                }
+              if (tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nRecoVertexStep2MTW2++;
+                  if(Signal)
+                  {
+                  if (tree_Hemi_LLP_ping->at(j))
+                    {
+                      nRecoVertexStep2MTW2Ping++;
+                    }
+                  }
+
+                }
+              if (tree_Hemi_Vtx_step->at(j)==3)
+                {
+                  nRecoVertexStep3MTW2++;
+                  if(Signal)
+                  {
+                    if (tree_Hemi_LLP_ping->at(j))
+                    {
+                      nRecoVertexStep3MTW2Ping++;
+                    }
+                  }
+
+                }
+            }
+      }
+//-----------------------------
+// int nStep_dR = ;
+// int nStep_InvMass = ;// needs btagging to be implemented
+//-----------
+
+//-----------------------------
+
+//--------ntrk10------
+//--------ntrk20------
+// std::cout<<"debug 1"<<std::endl;
+  for (int i =0 ;i<nStep_10;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_ntrk10->at(j)>=(ntrk10Cut+i*dntrk10))
+            {
+              nEvts_ntrk10[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_ntrk10_step1[i]++;
+                }
+            }
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_ntrk20->at(j)>=(ntrk20Cut+i*dntrk20))
+            {
+              nEvts_ntrk20[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_ntrk20_step1[i]++;
+                }
+            }
+        }
+    }
+// std::cout<<"debug 2"<<std::endl;
+// --------Vtx_dd------
+
+  for (int i =0 ;i<nStep_dd;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_Vtx_dd->at(j)>=(VtxddCut+i*ddd))
+            {
+              nEvts_Vtx_dd[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2 )
+                {
+                  nEvts_Vtx_dd_step1[i]++;
+                }
+            }
+        }
+    }
+// std::cout<<"debug 3"<<std::endl;
+    //--------Vtx_nTrks------
+//-----------------------------
+
+  for (int i =0 ;i<nStep_nTrks;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_nTrks->at(j)>=(VtxnTrksCut+i*dnTrks))
+            {
+              nEvts_Vtx_nTrks[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_Vtx_nTrks_step1[i]++;
+                }
+            }
+        }
+    }
+// std::cout<<"debug 4"<<std::endl;
+//--------Vtx_nVtx------
+  for (int i =0 ;i<nStep_nVtx;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi_Vtx_nVtx->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_nVtx->at(j)>=(VtxnVtxCut+i*dnVtx))
+            {
+              nEvts_Vtx_nVtx[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2 )
+                {
+                  nEvts_Vtx_nVtx_step1[i]++;
+                }
+            }
+        }
+    }
+//-----------------------------------------------
+
+//--------Vtx_Chi2------
+
+// float nEvts_Vtx_Chi2_step1[100] = {0};
+  for (int i =0 ;i<nStep_Chi2;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_NChi2->at(j)>=(VtxChi2Cut+i*dChi2))
+            {
+              nEvts_Vtx_Chi2[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_Vtx_Chi2_step1[i]++;
+                }
+            }
+        }
+    }
+//-----------------------------------------------
+
+//--------Vtx_Step------
+
+  for (int i =0 ;i<nStep_Step;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_step->at(j)>=(VtxStepCut+i*dStep))
+            {
+              nEvts_Vtx_Step[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_Vtx_Step_step1[i]++;
+                }
+            }
+        }
+    }
+//-----------------------------------------------
+
+//--------Vtx_InvMass------
+  for (int i =0 ;i<nStep_Mass;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_Mass->at(j)>=(VtxMassCut+i*dMass))
+            {
+              nEvts_Vtx_Mass[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_Vtx_Mass_step1[i]++;
+                }
+            }
+        }
+    }
+//-----------------------------------------------
+
+//--------Vtx_DCA tracks------
+
+  for (int i =0 ;i<nStep_DCA;i++)
+    {
+      for (unsigned int j = 0 ; j< tree_Hemi->size();j++)
+        {
+          if (tree_Hemi_Vtx_NChi2->at(j)>0 && tree_Hemi_Vtx_NChi2->at(j)<10 && tree_Hemi_Vtx_nTrks->at(j)>=(VtxDCACut+i*dDCA))
+            {
+              nEvts_Vtx_DCA[i]++;
+              if (tree_Hemi_Vtx_step->at(j)==1 || tree_Hemi_Vtx_step->at(j)==2)
+                {
+                  nEvts_Vtx_DCA_step1[i]++;
+                }
+            }
+        }
+    }
+
+
+  //-------------------------------------------------------------------//
+  //--------------------------EVTS Selection Variables-----------------//
+//--------Leadingjet pt------
+for (int i = 0 ; i < nStep_jet_pt ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_jet_leadingpt->size() ; j++)
+      {
+        if (tree_jet_leadingpt->at(j) > (JetPTCut+i*dpt))
+          {
+            nEvts_jetpt[i]++;
+          }
+      }
+  }
+
+//--------subLeadingjet pt------
+for (int i = 0 ; i < nStep_jet2_pt ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_jet_leadingpt2->size() ; j++)
+      {
+        if (tree_jet_leadingpt2->at(j) > (Jet2PTCut+i*dpt2))
+          {
+            nEvts_jetpt2[i]++;
+          }
+      }
+  }
+
+//--------Leadingmuon pt------
+for (int i = 0 ; i < nStep_muon_pt ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_leadingpt->size() ; j++)
+      {
+        if (tree_muon_leadingpt->at(j) > (MuonPTCut+i*dpt_muon))
+          {
+            nEvts_muonpt[i]++;
+          }
+      }
+  }
+
+//--------subLeading muon pt------
+for (int i = 0 ; i < nStep_muon2_pt ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_leadingpt2->size() ; j++)
+      {
+        if (tree_muon_leadingpt2->at(j) > (Muon2PTCut+i*dpt_muon2))
+          {
+            nEvts_muon2pt[i]++;
+          }
+      }
+  }
+
+//--------HT------
+for (int i = 0 ; i < nStep_HT_pt ; i++)
+  {
+    // for (unsigned int j = 0 ; j < tree_ST->size() ; j++)
+    //   {
+        if (tree_HT > (HTCut+i*dpt_HT))
+          {
+            nEvts_HT[i]++;
+          }
+      // }
+  }
+
+//--------ST------
+
+for (int i = 0 ; i < nStep_ST_pt ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_ST->size() ; j++)
+      {
+        if (tree_ST->at(j) > (STCut+i*dpt_ST))
+          {
+            nEvts_ST[i]++;
+          }
+      }
+  }
+
+//--------nJets
+for (int i = 0 ; i < nStep_nJet ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_ST->size() ; j++)
+      {
+        if (tree_njet > (nJetCut+i*dnJet_ST))
+          {
+            nEvts_nJet[i]++;
+          }
+      }
+  }
+
+  //-------------nmu----------//
+
+for (int i = 0 ; i < nStep_nMuon ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_nmu->size() ; j++)
+      {
+        if (tree_muon_nmu->at(j) > (nMuonCut+i*dnMuon))
+          {
+            nEvts_nMuon[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------muon_muon_dR----------//
+
+for (int i = 0 ; i < nStep_MuondR ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_muon_dR->size() ; j++)
+      {
+        if (tree_muon_muon_dR->at(j) > (MuondRCut+i*dMuondR))
+          {
+            nEvts_MuondR[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------muon_muon_dPhi----------//
+
+for (int i = 0 ; i < nStep_MuondPhi ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_muon_dPhi->size() ; j++)
+      {
+        if (tree_muon_muon_dPhi->at(j) > (MuondPhiCut+i*dMuondPhi))
+          {
+            nEvts_MuondPhi[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------muon_muon_dEta----------//
+
+for (int i = 0 ; i < nStep_MuondEta ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_muon_dEta->size() ; j++)
+      {
+        if (tree_muon_muon_dEta->at(j) > (MuondEtaCut+i*dMuondEta ))
+          {
+            nEvts_MuondEta[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------jet_jet_dR----------//
+
+for (int i = 0 ; i < nStep_JetdR ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_jet_jet_dR->size() ; j++)
+      {
+        if (tree_jet_jet_dR->at(j) > (JetdRCut+i*dJetdR))
+          {
+            nEvts_JetdR[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------jet_jet_dPhi----------//
+
+for (int i = 0 ; i < nStep_JetdPhi ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_jet_jet_dPhi->size() ; j++)
+      {
+        if (tree_jet_jet_dPhi->at(j) > (JetdPhiCut+i*dJetdPhi))
+          {
+            nEvts_JetdPhi[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------jet_jet_dEta----------//
+
+for (int i = 0 ; i < nStep_JetdEta ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_jet_jet_dEta->size() ; j++)
+      {
+        if (tree_jet_jet_dEta->at(j) > (JetdEtaCut+i*dJetdEta))
+          {
+            nEvts_JetdEta[i]++;
+          }
+      }
+  }
+// //------------------------------
+
+// //-------------muon_jet_dRmin----------//
+
+for (int i = 0 ; i < nStep_MuonJetdRmin ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_jet_dRmin->size() ; j++)
+      {
+        if (tree_muon_jet_dRmin->at(j) > (MuonJetdRminCut+i*dMuonJetdRmin))
+          {
+            nEvts_MuonJetdRmin[i]++;
+          }
+      }
+  }
+// //------------------------------
+// //-------------muon_jet_dRmax----------//
+
+for (int i = 0 ; i < nStep_MuonMuonJetdRmax ; i++)
+  {
+    for (unsigned int j = 0 ; j < tree_muon_jet_dRmax->size() ; j++)
+      {
+        if (tree_muon_jet_dRmax->at(j) > (MuonJetdRCutmax+i*dMuonJetdRmax))
+          {
+            nEvts_MuonJetdRmax[i]++;
+          }
+      }
+  }
+//------------------------------
+
+
+//---------------------------
+if (tree_Filter)
+  {
+    nEvts++;
+  }
+
+//----------resolution-------------//
+	// in PXB:
+	// ttree->Draw("tree_SecInt_LLP_dr","tree_SecInt_LLP>0&&tree_SecInt_selec&&tree_SecInt_r>2.6&&tree_SecInt_r<20&&abs(tree_SecInt_z)<27&&tree_SecInt_LLP_dr/tree_SecInt_r<0.1&&tree_SecInt_LLP_dr>0.12")
+	// in TIB:
+	// ttree->Draw("tree_SecInt_LLP_dr","tree_SecInt_LLP>0&&tree_SecInt_selec&&tree_SecInt_r>22&&tree_SecInt_r<52&&abs(tree_SecInt_z)<68&&tree_SecInt_LLP_dr/tree_SecInt_r<0.1&&tree_SecInt_LLP_dr>0.8")
+	// in TOB:
+	// ttree->Draw("tree_SecInt_LLP_dr","tree_SecInt_LLP>0&&tree_SecInt_selec&&tree_SecInt_r>50&&tree_SecInt_r<60&&abs(tree_SecInt_z)<108&&tree_SecInt_LLP_dr/tree_SecInt_r<0.1&&tree_SecInt_LLP_dr>3")
+	// in PXF:
+	// ttree->Draw("tree_SecInt_LLP_dz","tree_SecInt_LLP>0&&tree_SecInt_selec&&tree_SecInt_r>4.5&&tree_SecInt_r<16.5&&abs(tree_SecInt_z)>30&&abs(tree_SecInt_z)<50&&tree_SecInt_LLP_dr/tree_SecInt_r<0.1&&tree_SecInt_LLP_dz>1")
+	// in TID:
+	// ttree->Draw("tree_SecInt_LLP_dz","tree_SecInt_LLP>0&&tree_SecInt_selec&&tree_SecInt_r>22&&tree_SecInt_r<52&&abs(tree_SecInt_z)>70&&abs(tree_SecInt_z)<110&&tree_SecInt_LLP_dr/tree_SecInt_r<0.1&&tree_SecInt_LLP_dz>2.5")
+	// in TEC:
+	// ttree->Draw("tree_SecInt_LLP_dz","tree_SecInt_LLP>0&&tree_SecInt_selec&&tree_SecInt_r>20&&tree_SecInt_r<75&&abs(tree_SecInt_z)>120&&abs(tree_SecInt_z)<200&&tree_SecInt_LLP_dr/tree_SecInt_r<0.1&&tree_SecInt_LLP_dz>5")
+
+for (unsigned int i=0;i<tree_SecInt_x->size();i++)
+  {
+
+    //GLobal
+    if (tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&abs(tree_SecInt_LLP_dd->at(i))/tree_SecInt_d->at(i)<0.1 &&  abs(tree_SecInt_LLP_dr->at(i))<1)
+      {
+        hData_SecInt_res_r->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z->Fill(tree_SecInt_LLP_dz->at(i));
+        if(abs(tree_SecInt_eta->at(i))<1.5)
+          {
+            hData_SecInt_res_r_inf15->Fill(tree_SecInt_LLP_dr->at(i));
+            hData_SecInt_res_z_inf15->Fill(tree_SecInt_LLP_dz->at(i));
+          }
+        else
+          {
+            hData_SecInt_res_r_sup15->Fill(tree_SecInt_LLP_dr->at(i));
+            hData_SecInt_res_z_sup15->Fill(tree_SecInt_LLP_dz->at(i));
+          }
+      }
+
+    //PIXB 
+    if (tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&tree_SecInt_r->at(i)>2.6&&tree_SecInt_r->at(i)<20&&abs(tree_SecInt_z->at(i))<27&&abs(tree_SecInt_LLP_dd->at(i))/tree_SecInt_d->at(i)<0.1)
+      {
+        hData_SecInt_res_r_PIXB->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z_PIXB->Fill(tree_SecInt_LLP_dz->at(i));
+      }
+
+    //TIB
+    if(tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&tree_SecInt_r->at(i)>22&&tree_SecInt_r->at(i)<52&&abs(tree_SecInt_z->at(i))<68&&abs(tree_SecInt_LLP_dr->at(i))/tree_SecInt_r->at(i)<0.1)
+      {
+        hData_SecInt_res_r_TIB->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z_TIB->Fill(tree_SecInt_LLP_dz->at(i));
+      }
+    //TOB
+
+    if(tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&tree_SecInt_r->at(i)>50&&tree_SecInt_r->at(i)<60&&abs(tree_SecInt_z->at(i))<108&&abs(tree_SecInt_LLP_dr->at(i))/tree_SecInt_r->at(i)<0.1)
+      {
+        hData_SecInt_res_r_TOB->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z_TOB->Fill(tree_SecInt_LLP_dz->at(i));
+      }
+
+    //PIXF
+    if(tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&tree_SecInt_r->at(i)>4.5&&tree_SecInt_r->at(i)<16.5&&abs(tree_SecInt_z->at(i))>30&&abs(tree_SecInt_z->at(i))<50&&abs(tree_SecInt_LLP_dr->at(i))/tree_SecInt_r->at(i)<0.1)
+      {
+        hData_SecInt_res_r_PIXF->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z_PIXF->Fill(tree_SecInt_LLP_dz->at(i));
+      }
+
+    //TID
+    if(tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&tree_SecInt_r->at(i)>22&&tree_SecInt_r->at(i)<52&&abs(tree_SecInt_z->at(i))>70&&abs(tree_SecInt_z->at(i))<110&&abs(tree_SecInt_LLP_dr->at(i))/tree_SecInt_r->at(i)<0.1)
+      {
+        hData_SecInt_res_r_TID->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z_TID->Fill(tree_SecInt_LLP_dz->at(i));
+      }
+
+
+    //TEC
+    if(tree_SecInt_LLP->at(i)>0&&tree_SecInt_selec->at(i)&&tree_SecInt_r->at(i)>20&&tree_SecInt_r->at(i)<75&&abs(tree_SecInt_z->at(i))>120&&abs(tree_SecInt_z->at(i))<200&&abs(tree_SecInt_LLP_dr->at(i))/tree_SecInt_r->at(i)<0.1)
+      {
+        hData_SecInt_res_r_TEC->Fill(tree_SecInt_LLP_dr->at(i));
+        hData_SecInt_res_z_TEC->Fill(tree_SecInt_LLP_dz->at(i));
+      }
+    
+  }
+
+for (unsigned int k =0 ; k<tree_genAxis_dRneuneu->size() ; k++)
+  {
+    hGen_dRneuneu->Fill(tree_genAxis_dRneuneu->at(k));
+    hGen_dPhineuneu->Fill(abs(tree_genAxis_dPhineuneu->at(k)));
+    hGen_dEtaneuneu->Fill(abs(tree_genAxis_dEtaneuneu->at(k)));
+  }
+
+//--------------genJets---------------------//
+for (unsigned int k=0 ; k < tree_genJet_pt->size(); k++)
+  {
+    hGen_Jet_pt->Fill(tree_genJet_pt->at(k));
+  }
+if (tree_genJet_pt->size()>=2)
+    {
+      hGen_leadingjet_pt->Fill(tree_genJet_pt->at(0));
+      hGen_subleadingjet_pt->Fill(tree_genJet_pt->at(1));
+    }
+//-------------recojets---------------//
+  for (unsigned int k=0 ; k < tree_jet_pt->size(); k++)
+  {
+    hData_Jet_pt->Fill(tree_jet_pt->at(k));
+  }
+if (tree_jet_pt->size()>=2)
+    {
+      hData_leadingjet_pt->Fill(tree_jet_pt->at(0));
+      hData_subleadingjet_pt->Fill(tree_jet_pt->at(1));
+    }
+
+//---GenMuons-----------------//
+int Boom = 0;
+for (unsigned int k=0 ; k < tree_genParticle_pdgId->size(); k++)
+  {
+    if(abs(tree_genParticle_pdgId->at(k))!=13) continue;
+    hGen_Muon_pt->Fill(tree_genParticle_pt->at(k));
+    Boom++;
+  }
+  
+if (Boom>=2)
+    {
+      hGen_leadingmuon_pt->Fill(tree_genParticle_pt->at(0));
+      hGen_subleadingmuon_pt->Fill(tree_genParticle_pt->at(1));
+    }
+//---------------------recomuons---------------///
+  for (unsigned int k=0 ; k < tree_muon_pt->size(); k++)
+  {
+    hData_Muon_pt->Fill(tree_muon_pt->at(k));
+  }
+if (tree_muon_pt->size()>=2)
+    {
+      hData_leadingmuon_pt->Fill(tree_muon_pt->at(0));
+      hData_subleadingmuon_pt->Fill(tree_muon_pt->at(1));
+    }
+}// end Tree_Filter Condition
+
+
+ } //--------------------------- end loop on events -----------------------------------------
+
+//  std::cout << " Bug here " << std::endl;
 
  float sig_max;
  float bdtcutopti = 0;
@@ -2182,14 +3338,247 @@ for (unsigned int i=0;i<tree_SecInt_x->size();i++)
       h_sig->Fill(bdtcut+i*delta,sig[i]);
     }
     inte= inte/nStep;
-    std::cout<<"bdtcutopti : "<<bdtcutopti<<std::endl;
-    std::cout<<"inte : "<<inte<<std::endl;
+    // std::cout<<"bdtcutopti : "<<bdtcutopti<<std::endl;
+    // std::cout<<"inte : "<<inte<<std::endl;
   // double error=0;
   // double AUC = hBkfEff_SigEff->IntegralAndError(0,1,0,1,error);
   // std::cout<<"Integral Value : "<<AUC<<" +-"<<error<<std::endl;
 //################################################
 
+float size= TotalnVertex;
+float NRecoVertexEff = nRecoVertex/size;
+
+//---------------------VTX Selections Variables----
+  for (int i =0 ;i<nSteps+1;i++)
+    {
+      hData_Vtx_MeanTrackWeight->Fill(MeanTWcut+i*dTW,nSelecVtx[i]/nRecoVertex);
+      hData_Vtx_MeanTrackWeight_Step1->Fill(MeanTWcut+i*dTW,nSelecVtxStep1[i]/nRecoVertexStep1);            
+    }
+
+for (int h = 0 ; h < nStep_10; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_nTrk10->Fill(ntrk10Cut+h*dntrk10,nEvts_ntrk10[h]/nRecoVertex);
+      hData_Vtx_nTrk10_Step1->Fill(ntrk10Cut+h*dntrk10,nEvts_ntrk10_step1[h]/nRecoVertexStep1);
+      hData_Vtx_nTrk20->Fill(ntrk20Cut+h*dntrk20,nEvts_ntrk20[h]/nRecoVertex);
+      hData_Vtx_nTrk20_Step1->Fill(ntrk20Cut+h*dntrk20,nEvts_ntrk20_step1[h]/nRecoVertexStep1);
+  }
+
+for (int h = 0 ; h < nStep_dd; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_Vtx_dd->Fill(VtxddCut+h*ddd,nEvts_Vtx_dd[h]/nRecoVertex);
+      hData_Vtx_Vtx_dd_Step1->Fill(VtxddCut+h*ddd,nEvts_Vtx_dd_step1[h]/nRecoVertexStep1);
+  }
+  for (int h = 0 ; h < nStep_nTrks; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_nTrks->Fill(VtxnTrksCut+h*dnTrks,nEvts_Vtx_nTrks[h]/nRecoVertex);
+      hData_Vtx_nTrks_Step1->Fill(VtxnTrksCut+h*dnTrks,nEvts_Vtx_nTrks_step1[h]/nRecoVertexStep1);
+  }
+
+//--------------------------------//
+  for (int h = 0 ; h < nStep_nVtx; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_nVtx->Fill(VtxnVtxCut+h*dnVtx,nEvts_Vtx_nVtx[h]/nRecoVertex);
+      hData_Vtx_nVtx_Step1->Fill(VtxnVtxCut+h*dnVtx,nEvts_Vtx_nVtx_step1[h]/nRecoVertexStep1);
+  }
+
+
+  for (int h = 0 ; h < nStep_Chi2; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_NChi2->Fill(VtxChi2Cut+h*dChi2,nEvts_Vtx_Chi2[h]/nRecoVertex);
+      hData_Vtx_NChi2_Step1->Fill(VtxChi2Cut+h*dChi2,nEvts_Vtx_Chi2_step1[h]/nRecoVertexStep1);
+  }
+
+//--------Vtx_Step------
+  for (int h = 0 ; h < nStep_Step; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_Step->Fill(VtxStepCut+h*dStep,nEvts_Vtx_Step[h]/nRecoVertex);
+      hData_Vtx_Step_Step1->Fill(VtxStepCut+h*dStep,nEvts_Vtx_Step_step1[h]/nRecoVertexStep1);
+  }
+
+//--------Vtx_InvMass------
+  for (int h = 0 ; h < nStep_Mass; h++)
+  {
+    // std::cout<<nSelecVtx[h]<<std::endl;
+      hData_Vtx_Mass->Fill(VtxMassCut+h*dMass,nEvts_Vtx_Mass[h]/nRecoVertex);
+      hData_Vtx_Mass_Step1->Fill(VtxMassCut+h*dMass,nEvts_Vtx_Mass_step1[h]/nRecoVertexStep1);
+  }
+
+//-----------------------------------------------
+
+//--------Vtx_DCA tracks------
+
+  for (int h = 0 ; h < nStep_DCA; h++)
+  {
+      hData_Vtx_DCA->Fill(VtxDCACut+h*dDCA,nEvts_Vtx_DCA[h]/nRecoVertex);
+      hData_Vtx_DCA_Step1->Fill(VtxDCACut+h*dDCA,nEvts_Vtx_DCA_step1[h]/nRecoVertexStep1);
+  }
+
+//--------------------------------------------
+
+//------------Evts Selection Variables------------------------
+for(int h =0 ; h < nStep_jet_pt;h++)
+  {
+    hData_Evts_LeadingJetPt->Fill(JetPTCut+h*dpt,nEvts_jetpt[h]/nEvts);
+  }
+
+  for(int h =0 ; h < nStep_jet2_pt;h++)
+  {
+    hData_Evts_LeadingJet2Pt->Fill(Jet2PTCut+h*dpt,nEvts_jetpt2[h]/nEvts);
+  }
+
+for(int h =0 ; h < nStep_muon_pt;h++)
+  {
+    hData_Evts_LeadingMuonPt->Fill(MuonPTCut+h*dpt_muon,nEvts_muonpt[h]/nEvts);
+  }
+
+for(int h =0 ; h < nStep_muon2_pt;h++)
+  {
+    hData_Evts_LeadingMuon2Pt->Fill(Muon2PTCut+h*dpt_muon2,nEvts_muon2pt[h]/nEvts);
+  }
+
+for(int h =0 ; h < nStep_HT_pt;h++)
+  {
+    hData_Evts_HT->Fill(HTCut+h*dpt_HT,nEvts_HT[h]/nEvts);
+  }
+
+for(int h =0 ; h < nStep_ST_pt;h++)
+  {
+    hData_Evts_ST->Fill(STCut+h*dpt_ST,nEvts_ST[h]/nEvts);
+  }
+for(int h =0 ; h < nStep_nJet;h++)
+  {
+    hData_Evts_nJets->Fill(nJetCut+h*dnJet_ST,nEvts_nJet[h]/nEvts);
+  }
+//--------------------------------//
+  for(int h =0 ; h < nStep_nMuon;h++)
+  {
+    hData_Evts_nMuon->Fill(nMuonCut+h*dnMuon,nEvts_nMuon[h]/nEvts);
+  }
+
+// //------------------------------
+  for(int h =0 ; h < nStep_MuondR;h++)
+  {
+    hData_Evts_MuondR->Fill(MuondRCut+h*dMuondR,nEvts_MuondR[h]/nEvts);
+  }
+
+// //------------------------------
+
+// //-------------muon_muon_dPhi----------//
+  for(int h =0 ; h < nStep_MuondPhi;h++)
+  {
+    hData_Evts_MuondPhi->Fill(MuondPhiCut+h*dMuondPhi,nEvts_MuondPhi[h]/nEvts);
+  }
+
+// //------------------------------
+
+// //-------------muon_muon_dEta----------//
+  for(int h =0 ; h < nStep_MuondEta;h++)
+  {
+    hData_Evts_MuondEta->Fill(MuondEtaCut+h*dMuondEta,nEvts_MuondEta[h]/nEvts);
+  }
+
+// //------------------------------
+
+// //-------------jet_jet_dR----------//
+  for(int h =0 ; h < nStep_JetdR;h++)
+  {
+    hData_Evts_jet_jet_dR->Fill(JetdRCut+h*dJetdR,nEvts_JetdR[h]/nEvts);
+  }
+
+// //------------------------------
+
+// //-------------jet_jet_dPhi----------//
+
+  for(int h =0 ; h < nStep_JetdPhi;h++)
+  {
+    hData_Evts_jet_jet_dPhi->Fill(JetdPhiCut+h*dJetdPhi,nEvts_JetdPhi[h]/nEvts);
+  }
+// //------------------------------
+
+// //-------------jet_jet_dEta----------//
+  for(int h =0 ; h < nStep_JetdEta;h++)
+  {
+    hData_Evts_jet_jet_dEta->Fill(JetdEtaCut+h*dJetdEta,nEvts_JetdEta[h]/nEvts);
+  }
+
+// //------------------------------
+
+// //-------------muon_jet_dRmin----------//
+  for(int h =0 ; h < nStep_MuonJetdRmin;h++)
+  {
+    hData_Evts_muon_jet_dRmin->Fill(MuonJetdRminCut+h*dMuonJetdRmin,nEvts_MuonJetdRmin[h]/nEvts);
+  }
+
+// //------------------------------
+// //-------------muon_jet_dRmax----------//
+  for(int h =0 ; h < nStep_MuonMuonJetdRmax;h++)
+  {
+    hData_Evts_muon_jet_dRmax->Fill(MuonJetdRCutmax+h*dMuonJetdRmax,nEvts_MuonJetdRmax[h]/nEvts);
+  }
+
+//------------------------------------------------
+
+    string file = "BKG";
+    // string fileNtuple = "./Efficacity_"+file+".txt";
+    // std::ofstream ofs (fileNtuple,std::ofstream::out);
+std::ofstream ofs ("Efficacity_BKG.txt", std::ofstream::out);
+
+
+
+
+
+
+
+float MeanD = MeanDistance/nRecoVertex;
+float MeanDping = MeanDistance/nRecoVertexPing;
+float MeanDStep1 = MeanDistanceStep1/nRecoVertexStep1;
+float MeanDStep1ping = MeanDistanceStep1Ping/nRecoVertexStep1Ping;
+float MeanDStep2 = MeanDistanceStep2/nRecoVertexStep2;
+float MeanDStep2ping = MeanDistanceStep2Ping/nRecoVertexStep2Ping;
+float MeanDStep3 = MeanDistanceStep3/nRecoVertexStep3;
+float MeanDStep3ping = MeanDistanceStep3Ping/nRecoVertexStep3Ping;
+
+std::cout<<" nRecoVertex with good chi2 : "<<nRecoVertex<<std::endl;
+std::cout<<" nRecoVertex with ping : "<<nRecoVertexPing<<std::endl;
+std::cout<<" nRecoVertex with godd chi2 step1 : "<<nRecoVertexStep1<<std::endl;
+std::cout<<" nRecoVertex with ping step1: "<<nRecoVertexStep1Ping<<std::endl;
+std::cout<<" nRecoVertex with godd chi2 step2 : "<<nRecoVertexStep2<<std::endl;
+std::cout<<" nRecoVertex with ping step2: "<<nRecoVertexStep2Ping<<std::endl;
+std::cout<<" nRecoVertex with godd chi2 step3 : "<<nRecoVertexStep3<<std::endl;
+std::cout<<" nRecoVertex with ping step3: "<<nRecoVertexStep3Ping<<std::endl;
+std::cout<<" MeanDistance : "<<MeanD<<std::endl;
+std::cout<<" MeanDistance ping: "<<MeanDping<<std::endl;
+std::cout<<" MeanDistanceStep1 : "<<MeanDStep1<<std::endl;
+std::cout<<" MeanDistance STep1 ping: "<<MeanDStep1ping<<std::endl;
+std::cout<<" MeanDStep2 : "<<MeanDStep2<<std::endl;
+std::cout<<" MeanDStep2ping : "<<MeanDStep2ping<<std::endl;
+std::cout<<" MeanDStep3 : "<<MeanDStep3<<std::endl;
+std::cout<<" MeanDStep3ping : "<<MeanDStep3ping<<std::endl;
+
+std::cout<<" Total NRecoVertexEff : "<<NRecoVertexEff<<std::endl;
+std::cout<<" Total NRecoVertexEff ping : "<<nRecoVertexPing/size<<std::endl;
+std::cout<<" NRecoVertexEff step1: "<<nRecoVertexStep1/nRecoVertex<<std::endl;
+std::cout<<"  NRecoVertexEff  step 1 ping: "<<nRecoVertexStep1Ping/nRecoVertex<<std::endl;
+std::cout<<"  NRecoVertexEff  step 2: "<<nRecoVertexStep2/nRecoVertex<<std::endl;
+std::cout<<" NRecoVertexEffstep 2 ping : "<<nRecoVertexStep2Ping/nRecoVertex<<std::endl;
+std::cout<<" NRecoVertexEff step3: "<<nRecoVertexStep3/nRecoVertex<<std::endl;
+std::cout<<"  NRecoVertexEff step3 ping: "<<nRecoVertexStep3Ping/nRecoVertex<<std::endl;
 // Output Postscript
+ofs<<" //----------------- Efficacity for the Ntuple : " << file << " ---------------\\ "<<std::endl; 
+ofs<<"||        ---------         || Good Chi2 ||   Ping   || Good chi2 step1 || ping step 1 || Good chi2 step2 || ping step 2 || Good chi2 step3 || ping step 3 ||" <<std::endl;
+ofs<<"||        NVertexReco      "<<" ||    "<<nRecoVertex <<"  ||   "<<nRecoVertexPing  <<"   ||       "<<nRecoVertexStep1            <<"      ||     "<<nRecoVertexStep1Ping<<"    ||       "<<nRecoVertexStep2                  <<"      ||     "<<nRecoVertexStep2Ping         <<"    ||       "<<nRecoVertexStep3<<"       ||     "<<nRecoVertexStep3Ping<<"     || "<<std::endl;
+ofs<<"|| Mean Distance of flight "<<" ||  "<<MeanD         <<"  ||   "<<MeanDping         <<"  ||     "  <<MeanDStep1                  <<"     ||   "   <<MeanDStep1ping<<"   ||     "<<MeanDStep2                                 <<"     ||    "<<MeanDStep2ping                 <<"   ||     "<<MeanDStep3<<"     ||   "<<MeanDStep3ping<<"   || "<<std::endl;
+ofs<<"||           Eff           "<<" ||  "<<NRecoVertexEff <<" || "<<nRecoVertexPing/size <<" ||   "    <<nRecoVertexStep1/nRecoVertex<<"      ||    " <<nRecoVertexStep1Ping/nRecoVertex<<" ||    "<<nRecoVertexStep2/nRecoVertex<<"     ||   "<<nRecoVertexStep2Ping/nRecoVertex<<"  ||     "<<nRecoVertexStep3/nRecoVertex<<"   ||  "<<nRecoVertexStep3Ping/nRecoVertex<<"  || "<<std::endl;
+ofs<<"||           MTW>=2        "<<" ||  "<<nRecoVertexMTW2 <<" || "<<nRecoVertexMTW2Ping <<" ||   "    <<nRecoVertexStep1MTW2<<"      ||    " <<nRecoVertexStep1MTW2Ping<<" ||    "<<nRecoVertexStep2MTW2<<"     ||   "<<nRecoVertexStep2MTW2Ping<<"  ||     "<<nRecoVertexStep3MTW2<<"   ||  "<<nRecoVertexStep3MTW2Ping<<"  || "<<std::endl;
+ofs<<"|| NVertex To be reco : "<<size<<std::endl;
+ofs<<" //----------------- End of Table ---------------\\ "<<std::endl; 
+ofs.close();
 
 //   TCanvas* c = new TCanvas("c");
   hData_nPV -> Draw(); 
